@@ -54,7 +54,18 @@ const categories = [
 <style>
   .lead { color: var(--muted); font-size: 1.05rem; margin: 0 0 28px; max-width: 600px; }
   .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
-  .filter-btn { padding: 8px 18px; background: white; border: 1.5px solid #e0e0d8; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--text); transition: all 0.2s; font-family: inherit; }
+  .filter-btn { 
+    padding: 8px 18px; 
+    background: white; 
+    border: 1.5px solid #e0e0d8; 
+    border-radius: 0;
+    cursor: pointer; 
+    font-size: 0.9rem; 
+    font-weight: 500; 
+    color: var(--text); 
+    transition: all 0.2s; 
+    font-family: inherit; 
+  }
   .filter-btn:hover { border-color: var(--green-500); color: var(--green-700); }
   .filter-btn.active { background: var(--green-700); border-color: var(--green-700); color: white; }
   .grid-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }

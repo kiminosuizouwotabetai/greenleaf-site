@@ -19,16 +19,19 @@ import Footer from '../components/Footer.astro';
 </html>
 
 <style is:global>
-  :root {
-    --green-900: #1b4332;
-    --green-700: #2d6a4f;
-    --green-500: #40916c;
-    --green-100: #d8f3dc;
-    --gold: #d4a02a;
-    --cream: #fdfcf7;
-    --text: #1a1a1a;
-    --muted: #5a5a5a;
-  }
+:root {
+
+  --green-900: #0f1f16;
+  --green-700: #1a3d2e;
+  --green-500: #2e6b4f;
+  --green-100: #e6f2ea;
+  
+  --text: #111111;
+  --muted: #4a4a4a;
+  --cream: #f4faf6;
+  
+  --gold: #b8860b;
+}
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -48,16 +51,20 @@ import Footer from '../components/Footer.astro';
     padding: 12px 24px;
     background: var(--green-700);
     color: white;
-    border-radius: 8px;
+    border-radius: 0;
     font-weight: 600;
     transition: background 0.2s;
+    border: 2px solid transparent;
   }
+  
   .btn:hover { background: var(--green-900); color: white; }
+  
   .btn-outline {
     background: transparent;
     color: var(--green-700);
     border: 2px solid var(--green-700);
   }
+  
   .btn-outline:hover { background: var(--green-700); color: white; }
-  section { padding: 60px 0; }
+
 </style>
