@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import products from '../data/products.json';
+
+const categories = [
+  { key: 'all', name: 'Все' },
+  { key: 'sealuxe', name: 'SEALUXE' },
+  { key: 'carich', name: 'Carich' },
+  { key: 'ilife', name: 'iLiFE' },
+  { key: 'marvisia', name: 'Marvisia' },
+];
+---
+<Base title="Каталог продукции — Greenleaf">
+  <section>
+    <div class="container">
+      <h1>Каталог продукции</h1>
+      <p class="lead">Актуальный ассортимент Greenleaf. Цены и наличие уточняйте при заказе.</p>
+
+      <div class="filters" id="filters">
+        {categories.map(c => (
+          <button class:list={['filter-btn', { active: c.key === 'all' }]} data-category={c.key}>
+            {c.name}
+          </button>
+        ))}
+      </div>
+
+      <div class="grid-products" id="products">
+        {products.map(p => (
+          <div class="product-wrapper" data-category={p.category}>
+            <ProductCard product={p} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
+    const items = document.querySelectorAll<HTMLElement>('.product-wrapper');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.category;
+        items.forEach(item => {
+          item.style.display = (cat === 'all' || item.dataset.category === cat) ? '' : 'none';
+        });
+      });
+    });
+  </script>
+</Base>
+
+<style>
+  .lead { color: var(--muted); font-size: 1.05rem; margin: 0 0 28px; max-width: 600px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
+  .filter-btn { padding: 8px 18px; background: white; border: 1.5px solid #e0e0d8; border-radius: 20px; cursor: pointer; font-size: 0.9rem; font-weight: 500; color: var(--text); transition: all 0.2s; font-family: inherit; }
+  .filter-btn:hover { border-color: var(--green-500); color: var(--green-700); }
+  .filter-btn.active { background: var(--green-700); border-color: var(--green-700); color: white; }
+  .grid-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+</style>

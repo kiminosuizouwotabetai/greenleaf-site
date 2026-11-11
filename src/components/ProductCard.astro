@@ -1,0 +1,34 @@
+---
+const { product } = Astro.props;
+const categoryColors = {
+  sealuxe: 'linear-gradient(135deg, #2d6a4f, #74c69d)',
+  carich: 'linear-gradient(135deg, #1b4332, #52b788)',
+  ilife: 'linear-gradient(135deg, #40916c, #b7e4c7)',
+  marvisia: 'linear-gradient(135deg, #d4a02a, #f0d78c)',
+};
+---
+<article class="product-card">
+  <div class="product-image" style={`background: ${categoryColors[product.category] || '#d8f3dc'}`}>
+    <span>{product.categoryName}</span>
+  </div>
+  <div class="product-body">
+    <h3>{product.name}</h3>
+    <p class="short">{product.short}</p>
+    <div class="product-footer">
+      <span class="price">{product.price}</span>
+      <a href="/contacts" class="btn btn-outline small">Узнать больше</a>
+    </div>
+  </div>
+</article>
+
+<style>
+  .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+  .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+  .product-image { height: 160px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.4rem; letter-spacing: 1px; }
+  .product-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
+  .product-body h3 { font-size: 1.05rem; margin: 0; }
+  .short { color: var(--muted); font-size: 0.9rem; margin: 0; flex-grow: 1; }
+  .product-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .price { font-weight: 700; color: var(--green-900); }
+  .btn.small { padding: 6px 14px; font-size: 0.85rem; }
+</style>

@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Контакты">
+  <section>
+    <div class="container narrow">
+      <h1>Связаться со мной</h1>
+      <p class="lead">Отвечу на вопросы о продукции, помогу с заказом или расскажу о бизнесе с Greenleaf.</p>
+
+      <div class="contact-grid">
+        <div class="contact-item">
+          <span class="icon">✉️</span>
+          <div><strong>Email</strong><a href="mailto:you@example.com">you@example.com</a></div>
+        </div>
+        <div class="contact-item">
+          <span class="icon">📱</span>
+          <div><strong>Телефон / WhatsApp</strong><a href="tel:+70000000000">+7 (000) 000-00-00</a></div>
+        </div>
+        <div class="contact-item">
+          <span class="icon">💬</span>
+          <div><strong>Telegram</strong><a href="#">@your_username</a></div>
+        </div>
+      </div>
+
+      <div class="note">
+        <p><strong>Это шаблон.</strong> Замените контактные данные в файле <code>src/pages/contacts.astro</code> на свои.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .narrow { max-width: 640px; }
+  .lead { color: var(--muted); font-size: 1.05rem; margin: 0 0 32px; }
+  .contact-grid { display: flex; flex-direction: column; gap: 16px; }
+  .contact-item { display: flex; gap: 16px; align-items: center; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .contact-item .icon { font-size: 1.6rem; }
+  .contact-item strong { display: block; color: var(--green-900); margin-bottom: 4px; }
+  .contact-item a { font-size: 1.05rem; }
+  .note { margin-top: 40px; padding: 16px 20px; background: #fff8e1; border-left: 4px solid var(--gold); border-radius: 8px; font-size: 0.9rem; }
+  .note p { margin: 0; }
+  code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+</style>

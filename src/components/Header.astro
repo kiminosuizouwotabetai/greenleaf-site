@@ -1,0 +1,31 @@
+---
+const current = Astro.url.pathname;
+const links = [
+  { href: '/', label: 'Главная' },
+  { href: '/catalog', label: 'Каталог' },
+  { href: '/about', label: 'О компании' },
+  { href: '/contacts', label: 'Контакты' },
+];
+---
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="logo"><span class="logo-leaf">🌿</span><span>Greenleaf</span></a>
+    <nav>
+      {links.map(l => <a href={l.href} class:list={[{ active: current === l.href }]}>{l.label}</a>)}
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header { background: white; border-bottom: 1px solid #e8e8e0; position: sticky; top: 0; z-index: 100; }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+  .logo { font-size: 1.3rem; font-weight: 700; color: var(--green-900); display: flex; align-items: center; gap: 8px; }
+  nav { display: flex; gap: 28px; }
+  nav a { color: var(--text); font-weight: 500; font-size: 0.95rem; }
+  nav a.active, nav a:hover { color: var(--green-700); }
+  @media (max-width: 640px) {
+    nav { gap: 14px; }
+    nav a { font-size: 0.85rem; }
+    .logo { font-size: 1.05rem; }
+  }
+</style>

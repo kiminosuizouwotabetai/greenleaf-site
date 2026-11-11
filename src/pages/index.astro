@@ -1,0 +1,99 @@
+---
+import Base from '../layouts/Base.astro';
+import products from '../data/products.json';
+
+const categories = [
+  { key: 'sealuxe', name: 'SEALUXE', desc: 'Премиальный уход за кожей' },
+  { key: 'carich', name: 'Carich', desc: 'Витамины и БАДы' },
+  { key: 'ilife', name: 'iLiFE', desc: 'Товары для здоровья и дома' },
+  { key: 'marvisia', name: 'Marvisia', desc: 'Одежда и аксессуары' },
+];
+const featured = products.filter(p => p.featured).slice(0, 3);
+---
+<Base title="Greenleaf — ваш партнёр">
+  <section class="hero">
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <span class="eyebrow">Независимый партнёр Greenleaf</span>
+        <h1>Здоровье, красота и качество жизни — вместе с Greenleaf</h1>
+        <p>Представляю продукцию международной компании Greenleaf: премиальный уход, витамины, товары для дома и одежду. Помогу с выбором и оформлением заказа.</p>
+        <div class="hero-actions">
+          <a href="/catalog" class="btn">Смотреть каталог</a>
+          <a href="/about" class="btn btn-outline">О компании</a>
+        </div>
+      </div>
+      <div class="hero-visual"><div class="hero-badge">🌿</div></div>
+    </div>
+  </section>
+
+  <section class="categories">
+    <div class="container">
+      <h2>Категории продукции</h2>
+      <div class="grid-categories">
+        {categories.map(c => (
+          <a href={`/catalog#${c.key}`} class="category-card">
+            <h3>{c.name}</h3>
+            <p>{c.desc}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="featured">
+    <div class="container">
+      <h2>Популярные товары</h2>
+      <div class="grid-products">
+        {featured.map(p => (
+          <a href="/catalog" class="card-link">
+            <div class="mini-card">
+              <h3>{p.name}</h3>
+              <p>{p.short}</p>
+              <span class="category-tag">{p.categoryName}</span>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="/catalog" class="btn btn-outline">Весь каталог</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Хотите узнать больше?</h2>
+      <p>Свяжитесь со мной — расскажу о продукции и возможностях бизнеса с Greenleaf.</p>
+      <a href="/contacts" class="btn">Написать мне</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { padding: 80px 0; background: linear-gradient(135deg, #f0f8f3 0%, #fdfcf7 100%); }
+  .hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .eyebrow { display: inline-block; color: var(--green-700); font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .hero-text p { font-size: 1.1rem; color: var(--muted); margin: 0 0 28px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hero-visual { display: flex; justify-content: center; align-items: center; }
+  .hero-badge { font-size: 10rem; filter: drop-shadow(0 10px 20px rgba(45, 106, 79, 0.2)); }
+  .grid-categories { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+  .category-card { display: block; background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.2s; }
+  .category-card:hover { background: var(--green-100); transform: translateY(-3px); }
+  .category-card h3 { margin: 0 0 8px; color: var(--green-900); }
+  .category-card p { margin: 0; color: var(--muted); font-size: 0.9rem; }
+  .grid-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .card-link { color: inherit; }
+  .mini-card { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); height: 100%; transition: all 0.2s; border-left: 4px solid var(--gold); }
+  .mini-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+  .mini-card h3 { margin: 0 0 8px; font-size: 1.05rem; }
+  .mini-card p { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
+  .category-tag { display: inline-block; background: var(--green-100); color: var(--green-900); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }
+  .cta { background: var(--green-100); text-align: center; }
+  .cta p { color: var(--muted); max-width: 500px; margin: 0 auto 24px; }
+  @media (max-width: 768px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .hero-visual { display: none; }
+    .hero { padding: 50px 0; }
+  }
+</style>
