@@ -1,8 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import products from '../data/products.json';
-
-const featured = products.filter(p => p.featured).slice(0, 3);
 ---
 <Base title="Сервисный центр Greenleaf в Геленджике — Здоровье и красота">
   
@@ -78,22 +75,13 @@ const featured = products.filter(p => p.featured).slice(0, 3);
 
   <div class="divider"></div>
 
-  <section class="featured bg-light-green">
+  <section class="products-video-section bg-light-green">
     <div class="container">
-      <h2>Популярные товары</h2>
-      <div class="grid-products">
-        {featured.map(p => (
-          <a href="/catalog" class="card-link">
-            <div class="mini-card">
-              <h3>{p.name}</h3>
-              <p>{p.short}</p>
-              <span class="category-tag">{p.categoryName}</span>
-            </div>
-          </a>
-        ))}
-      </div>
-      <div style="text-align: center; margin-top: 30px;">
-        <a href="/catalog" class="btn btn-outline">Весь каталог</a>
+      <h2>Продукция компании</h2>
+      <div class="video-wrapper">
+        <video controls controlsList="nodownload" preload="metadata" poster="/logo.svg">
+          <source src="/glworld.mp4" type="video/mp4" />
+        </video>
       </div>
     </div>
   </section>
@@ -105,6 +93,48 @@ const featured = products.filter(p => p.featured).slice(0, 3);
       <h2>Хотите узнать больше?</h2>
       <p>Свяжитесь со мной — расскажу о продукции и возможностях бизнеса с Greenleaf.</p>
       <a href="/contacts" class="btn">Написать мне</a>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="partnership">
+    <div class="container">
+      <div class="partnership-header">
+        <span class="eyebrow">КАК СТАТЬ ПАРТНЁРОМ GREENLEAF</span>
+        <h2>Как стать партнёром и начать получать доход</h2>
+        <p class="lead">Знаете ли вы, что на товарах, которыми мы пользуемся ежедневно, можно построить прибыльный бизнес? Один раз выбираем и оплачиваем стартовый пакет — и запускаем свой доход.</p>
+      </div>
+      
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8V21H3V8M1 3H23V8H1V3ZM10 12H14M12 12V21M12 12H10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Стартовый пакет</h3>
+          <p>Один раз оплачиваете стартовый пакет стоимостью <strong>28 900 ₽</strong>.</p>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Бизнес-место и скидка</h3>
+          <p>Получаете бизнес-место в системе, готовое к выплатам, и партнерскую скидку <strong>50%</strong> на все покупки.</p>
+        </div>
+        
+        <div class="step-card">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1V23M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3>Достойный доход</h3>
+          <p>Приглашаете друзей и знакомых — получаете доход каждый день плюс один раз в месяц.</p>
+        </div>
+      </div>
+
+      <div class="partnership-action">
+        <a href="/contacts" class="btn">Узнать подробности</a>
+      </div>
     </div>
   </section>
 
@@ -134,7 +164,8 @@ const featured = products.filter(p => p.featured).slice(0, 3);
     margin: 0 auto;
   }
 
-  .video-section h2 { text-align: center; margin-bottom: 30px; }
+  .video-section h2, .products-video-section h2 { text-align: center; margin-bottom: 30px; }
+  
   .video-wrapper {
     max-width: 800px;
     margin: 0 auto;
@@ -144,13 +175,6 @@ const featured = products.filter(p => p.featured).slice(0, 3);
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
-  }
-
-  .video-inner {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9; 
     overflow: hidden;
   }
 
@@ -186,25 +210,94 @@ const featured = products.filter(p => p.featured).slice(0, 3);
   .info-card h3 { font-size: 1.1rem; margin: 0 0 12px 0; color: var(--text); text-transform: uppercase; letter-spacing: 0.5px; min-height: 3.2rem; display: flex; align-items: center; justify-content: center; }
   .info-card p { color: var(--text-muted); font-size: 0.9rem; margin: 0; line-height: 1.5; }
 
-  .grid-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-  .card-link { color: inherit; }
-  .mini-card {
-    background: var(--bg-card);
-    padding: 24px;
-    border: 1px solid var(--border-color);
-    border-left: 4px solid var(--gold);
-    height: 100%;
-    transition: all 0.2s;
-    display: flex;
-    flex-direction: column;
-  }
-  .mini-card:hover { transform: translateY(-3px); border-color: var(--gold); }
-  .mini-card h3 { margin: 0 0 8px; font-size: 1.05rem; color: var(--text); }
-  .mini-card p { margin: 0 0 12px; color: var(--text-muted); font-size: 0.9rem; flex-grow: 1; }
-  .category-tag { display: inline-block; background: transparent; color: var(--brand-green); border: 1px solid var(--brand-green); padding: 4px 10px; font-size: 0.8rem; font-weight: 600; align-self: flex-start; }
-
   .cta { background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center; }
   .cta p { color: var(--text-muted); max-width: 500px; margin: 0 auto 24px; }
+
+  .partnership { 
+    background: var(--bg-body); 
+    padding: 80px 0;
+  }
+
+  .partnership-header { 
+    max-width: 800px; 
+    margin: 0 auto 50px; 
+    text-align: center; 
+  }
+  
+  .partnership-header .lead { 
+    font-size: 1.1rem; 
+    color: var(--text-muted); 
+    margin-top: 15px; 
+  }
+  
+  .steps-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 30px; 
+    margin-bottom: 50px; 
+  }
+
+  .step-card {
+    background: var(--bg-card);
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--brand-green);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .step-card:hover { 
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  }
+
+  .step-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--brand-green);
+    margin-bottom: 20px;
+  }
+
+  .step-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .step-card h3 { 
+    font-size: 1.2rem; 
+    margin: 0 0 15px 0; 
+    color: var(--text); 
+  }
+
+  .step-card p { 
+    color: var(--text-muted); 
+    margin: 0; 
+    font-size: 0.95rem; 
+    line-height: 1.6; 
+  }
+
+  .step-card strong { 
+    color: var(--text); 
+    font-weight: 700;
+  }
+
+  .partnership-action { 
+    text-align: center; 
+  }
+
+  .btn-gold { 
+    background: var(--gold); 
+    border-color: var(--gold); 
+    color: #fff; 
+  }
+
+  .btn-gold:hover { 
+    background: #b8860b; 
+    border-color: #b8860b; 
+    color: #fff; 
+  }
 
   @media (max-width: 768px) {
     .hero-inner { grid-template-columns: 1fr; }
