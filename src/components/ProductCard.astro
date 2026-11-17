@@ -22,13 +22,15 @@ const categoryColors = {
 </article>
 
 <style>
-  .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
-  .product-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-  .product-image { height: 160px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.4rem; letter-spacing: 1px; }
-  .product-body { padding: 20px; display: flex; flex-direction: column; gap: 12px; flex-grow: 1; }
-  .product-body h3 { font-size: 1.05rem; margin: 0; }
-  .short { color: var(--muted); font-size: 0.9rem; margin: 0; flex-grow: 1; }
-  .product-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .price { font-weight: 700; color: var(--green-900); }
+.product-card { 
+  background: var(--bg-card); 
+  border-radius: 0; 
+  border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+.product-card:hover { 
+  border-color: var(--brand-green); 
+}
+.product-body h3 { color: var(--text); }
+.short { color: var(--text-muted); }
+.price { color: var(--brand-green); font-weight: 700; }
   .btn.small { padding: 6px 14px; font-size: 0.85rem; }
 </style>

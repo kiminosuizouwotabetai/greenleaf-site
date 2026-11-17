@@ -1,5 +1,5 @@
 ---
-const { title = 'Greenleaf — ваш партнёр' } = Astro.props;
+const { title = 'Сервисный центр Greenleaf в Геленджике | Официальный партнёр' } = Astro.props;
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 ---
@@ -9,6 +9,7 @@ import Footer from '../components/Footer.astro';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="description" content="Сервисный центр Greenleaf в Геленджике. Премиальный уход, витамины, товары для дома и одежды. Помощь с выбором и оформлением заказа." />
   <title>{title}</title>
 </head>
 <body>
@@ -20,51 +21,58 @@ import Footer from '../components/Footer.astro';
 
 <style is:global>
 :root {
-
-  --green-900: #0f1f16;
-  --green-700: #1a3d2e;
-  --green-500: #2e6b4f;
-  --green-100: #e6f2ea;
+  /* Официальная палитра greenleaf.online */
+  --brand-green: #179B49;       /* Основной фирменный зелёный */
+  --brand-green-dark: #00682E;  /* Тёмно-зелёный для ховеров */
+  --brand-green-light: #F3F4F6; /* Очень светлый серо-зелёный фон */
   
-  --text: #111111;
-  --muted: #4a4a4a;
-  --cream: #f4faf6;
+  --bg-body: #F3F4F6;           /* Фон страницы */
+  --bg-card: #FFFFFF;           /* Белый фон карточек */
   
-  --gold: #b8860b;
+  --text: #1a1a1a;              /* Почти чёрный текст */
+  --text-muted: #5a6b60;        /* Второстепенный серо-зелёный */
+  
+  --border-color: #e0e8e2;      /* Рамки */
+  --gold: #d4a02a;              /* Золотой акцент */
 }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: var(--text);
-    background: var(--cream);
-    line-height: 1.6;
-  }
-  a { color: var(--green-700); text-decoration: none; }
-  a:hover { color: var(--green-900); }
-  .container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
-  h1, h2, h3 { color: var(--green-900); line-height: 1.2; }
-  h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 20px; }
-  h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: 0 0 16px; }
-  .btn {
-    display: inline-block;
-    padding: 12px 24px;
-    background: var(--green-700);
-    color: white;
-    border-radius: 0;
-    font-weight: 600;
-    transition: background 0.2s;
-    border: 2px solid transparent;
-  }
-  
-  .btn:hover { background: var(--green-900); color: white; }
-  
-  .btn-outline {
-    background: transparent;
-    color: var(--green-700);
-    border: 2px solid var(--green-700);
-  }
-  
-  .btn-outline:hover { background: var(--green-700); color: white; }
 
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg-body);
+  line-height: 1.6;
+}
+
+a { color: var(--brand-green); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--brand-green-dark); }
+.container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+h1, h2, h3 { color: var(--text); line-height: 1.2; }
+h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 20px; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: 0 0 16px; }
+
+/* Кнопки */
+.btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background: var(--brand-green);
+  color: white;
+  border-radius: 0; /* Острые углы */
+  font-weight: 600;
+  transition: background 0.2s;
+  border: 2px solid transparent;
+}
+.btn:hover { background: var(--brand-green-dark); color: white; }
+
+.btn-outline {
+  background: transparent;
+  color: var(--brand-green);
+  border: 2px solid var(--brand-green);
+}
+.btn-outline:hover { background: var(--brand-green); color: white; }
+
+section { padding: 60px 0; }
 </style>
