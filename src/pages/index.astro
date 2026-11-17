@@ -31,6 +31,22 @@ const featured = products.filter(p => p.featured).slice(0, 3);
     </div>
   </section>
 
+  <section class="video-section bg-light-green">
+    <div class="container">
+      <h2>Презентация компании</h2>
+      <div class="video-wrapper">
+        <video 
+          controls 
+          controlsList="nodownload" 
+          poster="/logo.svg" 
+          preload="metadata"
+        >
+          <source src="/preza.mp4" type="video/mp4" />
+        </video>
+      </div>
+    </div>
+  </section>
+
   <section class="company-info">
     <div class="container">
       <h2>Философия Greenleaf</h2>
@@ -72,7 +88,7 @@ const featured = products.filter(p => p.featured).slice(0, 3);
     </div>
   </section>
 
-  <section class="featured">
+  <section class="featured bg-light-green">
     <div class="container">
       <h2>Популярные товары</h2>
       <div class="grid-products">
@@ -199,6 +215,31 @@ const featured = products.filter(p => p.featured).slice(0, 3);
   .category-tag { display: inline-block; background: var(--green-100); color: var(--green-900); padding: 4px 10px; border-radius: 0; font-size: 0.8rem; font-weight: 600; }
   .cta { background: var(--green-100); text-align: center; }
   .cta p { color: var(--muted); max-width: 500px; margin: 0 auto 24px; }
+
+  .video-section {
+    padding: 40px 0;
+    background-color: var(--bg-body);
+  }
+
+  .video-section h2 {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .video-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    background: #000;
+  }
+
+  .video-wrapper video {
+    display: block;
+    width: 100%;
+    height: auto;
+    outline: none;
+  }
   @media (max-width: 768px) {
     .hero-inner { grid-template-columns: 1fr; }
     .hero-visual { display: none; }
