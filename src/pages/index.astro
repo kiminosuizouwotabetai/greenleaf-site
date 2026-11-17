@@ -79,7 +79,7 @@ import Base from '../layouts/Base.astro';
     <div class="container">
       <h2>Продукция компании</h2>
       <div class="video-wrapper">
-        <video controls controlsList="nodownload" preload="metadata" poster="/logo.svg">
+        <video controls controlsList="nodownload" preload="metadata"  >
           <source src="/glworld.mp4" type="video/mp4" />
         </video>
       </div>
@@ -179,6 +179,90 @@ import Base from '../layouts/Base.astro';
 
   <div class="divider"></div>
 
+  <section class="start-sets">
+    <div class="container">
+      <h2>Стартовые наборы</h2>
+      <p class="sets-subtitle">Наборы составляет компания и отправляет новым партнёрам бесплатно</p>
+      
+      <div class="sets-grid">
+        <div class="set-card" data-target="modal1">
+          <div class="set-image">
+            <img src="/images/set1.png" alt="Набор ухаживающей косметики SEALUXE" />
+          </div>
+          <div class="set-info">
+            <h3>Набор «Фиолетовый»</h3>
+            <span class="btn btn-outline">Подробнее</span>
+          </div>
+        </div>
+
+        <div class="set-card" data-target="modal2">
+          <div class="set-image">
+            <img src="/images/set2.png" alt="Набор ухаживающей косметики Морское цветение" />
+          </div>
+          <div class="set-info">
+            <h3>Набор «Кремовый»</h3>
+            <span class="btn btn-outline">Подробнее</span>
+          </div>
+        </div>
+
+        <div class="set-card" data-target="modal3">
+          <div class="set-image">
+            <img src="/images/set3.png" alt="Набор для здоровья Kardli" />
+          </div>
+          <div class="set-info">
+            <h3>Набор «Здоровье»</h3>
+            <span class="btn btn-outline">Подробнее</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="modal-overlay" id="modal1">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3>Набор «Фиолетовый»</h3>
+      <ul>
+        <li>Набор ухаживающей косметики на основе двувалентных дрожжей от SEALUXE</li>
+        <li>Зубная паста на основе морских водорослей (120г) от iLiFE</li>
+        <li>Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
+        <li>Натуральные салфетки из небеленого бамбукового волокна</li>
+        <li>Многофункциональный гель для стирки (1кг)</li>
+        <li>Жидкое средство для мытья посуды (1кг)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal2">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3>Набор «Кремовый»</h3>
+      <ul>
+        <li>Набор ухаживающей косметики "Морское цветение" от SEALUXE</li>
+        <li>Зубная паста на основе морских водорослей (120г) от iLiFE</li>
+        <li>Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
+        <li>Натуральные салфетки из небеленого бамбукового волокна</li>
+        <li>Многофункциональный гель для стирки (1кг)</li>
+        <li>Жидкое средство для мытья посуды (1кг)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal3">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3>Набор «Здоровье»</h3>
+      <ul>
+        <li>Стакан Kardli для получения оздоровительной воды</li>
+        <li>Зубная щетка с гибкой и мягкой щетиной от CARICH</li>
+        <li>Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
+        <li>Натуральные салфетки из небеленого бамбукового волокна</li>
+        <li>Многофункциональный гель для стирки (1кг)</li>
+        <li>Жидкое средство для мытья посуды (1кг)</li>
+      </ul>
+    </div>
+  </div>
+  
   <section class="cta">
     <div class="container">
       <h2>Хотите узнать больше?</h2>
@@ -259,6 +343,34 @@ import Base from '../layouts/Base.astro';
     } else {
       initSlider();
     }
+
+    const setCards = document.querySelectorAll('.set-card');
+    const modals = document.querySelectorAll('.modal-overlay');
+    const closeButtons = document.querySelectorAll('.modal-close');
+
+    setCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const targetId = card.getAttribute('data-target');
+        const targetModal = document.getElementById(targetId);
+        if (targetModal) {
+          targetModal.classList.add('active');
+        }
+      });
+    });
+
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.modal-overlay').classList.remove('active');
+      });
+    });
+
+    modals.forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
   </script>
 
 </Base>
@@ -458,6 +570,140 @@ import Base from '../layouts/Base.astro';
     background: #179B49;
     width: 30px;
     border-radius: 5px;
+  }
+
+    /* --- Стили для стартовых наборов --- */
+  .start-sets { padding: 80px 0; background: var(--bg-body); }
+  .start-sets h2 { text-align: center; margin-bottom: 10px; }
+  .sets-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem; }
+
+  .sets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .set-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .set-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border-color: var(--brand-green);
+  }
+
+  .set-image {
+    height: 250px;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .set-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+
+  .set-card:hover .set-image img {
+    transform: scale(1.05);
+  }
+
+  .set-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .set-info h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  /* --- Стили для модального окна --- */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+
+  .modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-content {
+    background: var(--bg-card);
+    padding: 40px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    border-top: 4px solid var(--brand-green);
+    transform: translateY(20px);
+    transition: transform 0.3s;
+  }
+
+  .modal-overlay.active .modal-content {
+    transform: translateY(0);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    line-height: 1;
+  }
+
+  .modal-close:hover {
+    color: var(--brand-green);
+  }
+
+  .modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .modal-content p {
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .modal-content ul {
+    padding-left: 20px;
+    color: var(--text);
+  }
+
+  .modal-content li {
+    margin-bottom: 10px;
   }
 
   .cta { background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center; padding: 60px 0; }
