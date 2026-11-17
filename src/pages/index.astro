@@ -79,7 +79,7 @@ import Base from '../layouts/Base.astro';
     <div class="container">
       <h2>Продукция компании</h2>
       <div class="video-wrapper">
-        <video controls controlsList="nodownload" preload="metadata"  >
+        <video controls controlsList="nodownload" preload="metadata">
           <source src="/glworld.mp4" type="video/mp4" />
         </video>
       </div>
@@ -187,7 +187,7 @@ import Base from '../layouts/Base.astro';
       <div class="sets-grid">
         <div class="set-card" data-target="modal1">
           <div class="set-image">
-            <img src="/images/set1.png" alt="Набор ухаживающей косметики SEALUXE" />
+            <img src="/images/set1.png" alt="Набор Фиолетовый" />
           </div>
           <div class="set-info">
             <h3>Набор «Фиолетовый»</h3>
@@ -197,7 +197,7 @@ import Base from '../layouts/Base.astro';
 
         <div class="set-card" data-target="modal2">
           <div class="set-image">
-            <img src="/images/set2.png" alt="Набор ухаживающей косметики Морское цветение" />
+            <img src="/images/set2.png" alt="Набор Кремовый" />
           </div>
           <div class="set-info">
             <h3>Набор «Кремовый»</h3>
@@ -207,7 +207,7 @@ import Base from '../layouts/Base.astro';
 
         <div class="set-card" data-target="modal3">
           <div class="set-image">
-            <img src="/images/set3.png" alt="Набор для здоровья Kardli" />
+            <img src="/images/set3.png" alt="Набор для здоровья" />
           </div>
           <div class="set-info">
             <h3>Набор «Здоровье»</h3>
@@ -222,13 +222,14 @@ import Base from '../layouts/Base.astro';
     <div class="modal-content">
       <button class="modal-close">&times;</button>
       <h3>Набор «Фиолетовый»</h3>
-      <ul>
-        <li>Набор ухаживающей косметики на основе двувалентных дрожжей от SEALUXE</li>
-        <li>Зубная паста на основе морских водорослей (120г) от iLiFE</li>
-        <li>Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
-        <li>Натуральные салфетки из небеленого бамбукового волокна</li>
-        <li>Многофункциональный гель для стирки (1кг)</li>
-        <li>Жидкое средство для мытья посуды (1кг)</li>
+      <p>Нажмите на товар, чтобы узнать подробности</p>
+      <ul class="product-list">
+        <li class="clickable-item" data-product="sealuxe_yeast">Набор ухаживающей косметики на основе двувалентных дрожжей от SEALUXE</li>
+        <li class="clickable-item" data-product="toothpaste_ilife">Зубная паста на основе морских водорослей (120г) от iLiFE</li>
+        <li class="clickable-item" data-product="pads_anian">Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
+        <li class="clickable-item" data-product="napkins_bamboo">Натуральные салфетки из небеленого бамбукового волокна</li>
+        <li class="clickable-item" data-product="gel_laundry">Многофункциональный гель для стирки (1кг)</li>
+        <li class="clickable-item" data-product="dish_soap">Жидкое средство для мытья посуды (1кг)</li>
       </ul>
     </div>
   </div>
@@ -237,13 +238,14 @@ import Base from '../layouts/Base.astro';
     <div class="modal-content">
       <button class="modal-close">&times;</button>
       <h3>Набор «Кремовый»</h3>
-      <ul>
-        <li>Набор ухаживающей косметики "Морское цветение" от SEALUXE</li>
-        <li>Зубная паста на основе морских водорослей (120г) от iLiFE</li>
-        <li>Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
-        <li>Натуральные салфетки из небеленого бамбукового волокна</li>
-        <li>Многофункциональный гель для стирки (1кг)</li>
-        <li>Жидкое средство для мытья посуды (1кг)</li>
+      <p>Нажмите на товар, чтобы узнать подробности</p>
+      <ul class="product-list">
+        <li class="clickable-item" data-product="sealuxe_sea">Набор ухаживающей косметики "Морское цветение" от SEALUXE</li>
+        <li class="clickable-item" data-product="toothpaste_ilife">Зубная паста на основе морских водорослей (120г) от iLiFE</li>
+        <li class="clickable-item" data-product="pads_anian">Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
+        <li class="clickable-item" data-product="napkins_bamboo">Натуральные салфетки из небеленого бамбукового волокна</li>
+        <li class="clickable-item" data-product="gel_laundry">Многофункциональный гель для стирки (1кг)</li>
+        <li class="clickable-item" data-product="dish_soap">Жидкое средство для мытья посуды (1кг)</li>
       </ul>
     </div>
   </div>
@@ -252,14 +254,30 @@ import Base from '../layouts/Base.astro';
     <div class="modal-content">
       <button class="modal-close">&times;</button>
       <h3>Набор «Здоровье»</h3>
-      <ul>
-        <li>Стакан Kardli для получения оздоровительной воды</li>
-        <li>Зубная щетка с гибкой и мягкой щетиной от CARICH</li>
-        <li>Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
-        <li>Натуральные салфетки из небеленого бамбукового волокна</li>
-        <li>Многофункциональный гель для стирки (1кг)</li>
-        <li>Жидкое средство для мытья посуды (1кг)</li>
+      <p>Нажмите на товар, чтобы узнать подробности</p>
+      <ul class="product-list">
+        <li class="clickable-item" data-product="kardli_cup">Стакан Kardli для получения оздоровительной воды</li>
+        <li class="clickable-item" data-product="brush_carich">Зубная щетка с гибкой и мягкой щетиной от CARICH</li>
+        <li class="clickable-item" data-product="pads_anian">Женские гигиенические ухаживающие прокладки с аниановым чипом</li>
+        <li class="clickable-item" data-product="napkins_bamboo">Натуральные салфетки из небеленого бамбукового волокна</li>
+        <li class="clickable-item" data-product="gel_laundry">Многофункциональный гель для стирки (1кг)</li>
+        <li class="clickable-item" data-product="dish_soap">Жидкое средство для мытья посуды (1кг)</li>
       </ul>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="productModal" style="z-index: 1100;">
+    <div class="modal-content product-modal-content">
+      <button class="modal-close" id="closeProductModal">&times;</button>
+      
+      <div class="product-slider">
+        <div class="product-slider-track" id="productImageTrack"></div>
+        <button class="slider-btn product-prev" id="prodPrev">❮</button>
+        <button class="slider-btn product-next" id="prodNext">❯</button>
+      </div>
+
+      <h3 id="productTitle">Название товара</h3>
+      <div id="productDesc" class="product-desc"></div>
     </div>
   </div>
   
@@ -344,17 +362,174 @@ import Base from '../layouts/Base.astro';
       initSlider();
     }
 
+    const productData = {
+      sealuxe_yeast: {
+        title: "Набор ухаживающей косметики на основе двувалентных дрожжей",
+        desc: `<p>SEALUXE® представляет свое новейшее достижение в области ухода за кожей. Каждый продукт косметической серии предназначен для определенной ступени ухода за кожей, обеспечивая комплексный подход к её увлажнению, питанию и восстановлению.</p>
+               <p>Бифидодрожжи в косметике увлажняют кожу, делая её более упругой и гладкой. Помогают восстановить защитный барьер кожи, защищая от внешних раздражителей и улучшая текстуру кожи. Компоненты линейки также обладают антивозрастными и противовоспалительными свойствами, подходят для чувствительной и зрелой кожи.</p>
+               <p><strong>Активные ингредиенты:</strong> никотинамид, продукты ферментации бифидодрожжей, карнозин, аргинин, лизин, экстракт корня шлемника байкальского, каррагинан, экстракт корня софоры, экстракт цветков маргаритки, экстракт розы, экстракт жасмина, молочная кислота, токоферол (витамин E).</p>
+               <ul>
+                 <li><strong>Двухкомпонентное дрожжевое очищающее средство для умывания (100г).</strong> Инновационный продукт сочетает в себе мощные очищающие свойства с нежным уходом. Содержит поверхностно-активные очищающие ингредиенты с двумя аминокислотами, создающие плотную пенящуюся текстуру. Обогащен комплексом увлажняющих и питательных компонентов.</li>
+                 <li><strong>Двухкомпонентный дрожжевой тоник (120мл).</strong></li>
+                 <li><strong>Смягчающий лосьон на основе двухвалентных дрожжей (100 мл).</strong></li>
+                 <li><strong>Смягчающая эссенция на основе двухвалентных дрожжей (30 мл).</strong> Сочетают в себе мощные увлажняющие свойства с нежным уходом. Бифидодрожжи стимулируют регенеративные процессы и укрепляют защитный барьер кожи, уменьшают видимость морщин, повышают упругость и эластичность.</li>
+                 <li><strong>Укрепляющий крем с бифидодрожжами (50г).</strong> Мягко ухаживает за чувствительной кожей, не вызывая раздражения. Имеет легкую текстуру, быстро впитывается и не оставляет жирного блеска.</li>
+                 <li><strong>Укрепляющий крем для глаз на основе бифидодрожжей (20г).</strong> Обеспечивает глубокое увлажнение, обогащен комплексом питательных компонентов.</li>
+               </ul>`,
+        images: ["/images/startsetgoods/purple1.webp", "/images/startsetgoods/purple2.webp", "/images/startsetgoods/purple3.webp", "/images/startsetgoods/purple4.webp", "/images/startsetgoods/purple5.jpg", "/images/startsetgoods/purple6.webp"]
+      },
+      toothpaste_ilife: {
+        title: "Зубная паста на основе морских водорослей (120г)",
+        desc: `<p>Зубная паста с водорослями iLiFE:</p>
+               <ul>
+                 <li>укрепляет эмаль и защищает зубы от кариеса,</li>
+                 <li>уменьшает проблемы с деснами,</li>
+                 <li>устраняет повреждения слизистой оболочки,</li>
+                 <li>убирает неприятный запах изо рта,</li>
+                 <li>улучшает здоровье ротовой полости.</li>
+               </ul>
+               <p>Экстракт водорослей укрепляет эмаль и предупреждает развитие кариеса зубов в 2-3 раза эффективнее, чем сопоставляемые сенситивные зубные пасты, в т.ч. фторсодержащие.</p>
+               <p>Зубная паста эффективно и бережно очищает эмаль зубов до естественного цвета, эффективно удаляет зубной налет и препятствует его образованию.</p>
+               <ul>
+                 <li>Паста имеет мягкую текстуру;</li>
+                 <li>Содержит мяту (освежающий эффект);</li>
+                 <li>Экстракт морских водорослей предотвращение воспаления;</li>
+                 <li>Глицирризинат дикалия имеет детоксикационный, противовоспалительный и противоаллергический эффект;</li>
+                 <li>Не содержит фторсодержащих элементов.</li>
+               </ul>
+               <p>Данная паста - это комплексная защита и полное очищение зубов. Подходит для всей семьи.</p>`,
+        images: ["/images/startsetgoods/tooth1.webp", "/images/startsetgoods/tooth2.webp"]
+      },
+      pads_anian: {
+        title: "Женские гигиенические ухаживающие прокладки с аниановым чипом",
+        desc: `<p><strong>Инновационный 8-слойный дизайн:</strong></p>
+               <ol>
+                 <li>Анионовый магнитный чип</li>
+                 <li>100% хлопок</li>
+                 <li>Аирлайд бумага</li>
+                 <li>Прокладочная бумага</li>
+                 <li>Высокомолекулярный абсорбирующий слой</li>
+                 <li>Воздухопроницаемая мембрана</li>
+                 <li>Защитная пленка</li>
+                 <li>Слой клея (без флуоресценции)</li>
+               </ol>
+               <p>Каждая прокладка создана для максимального комфорта и эффективности:</p>
+               <ul>
+                 <li>Инновационный дизайн обеспечивает исключительную посадку и защиту.</li>
+                 <li>Отсутствие флуоресцентных добавок и ароматизаторов гарантирует естественное ощущение без раздражений.</li>
+                 <li>Мягкая быстровпитывающая поверхность идеально подходит для чувствительной кожи.</li>
+                 <li>Анионовый чип активно борется с бактериями и запахами, обеспечивая антибактериальное и профилактическое действие.</li>
+               </ul>
+               <p>Технология анионовой системы включает в себя выделение полезных молекул анионов, которые генерируются анионовым чипом, интегрированным в хлопковую поверхность прокладки. Эти анионы помогают нейтрализовать неприятные запахи и предотвращать бактериальное размножение, обеспечивая чистоту и свежесть на протяжении всего дня.</p>`,
+        images: ["/images/startsetgoods/procl1.webp"]
+      },
+      napkins_bamboo: {
+        title: "Натуральные салфетки из небеленого бамбукового волокна",
+        desc: `<p>Продукт слегка желтоватого цвета — натуральный цвет без отбеливания. Без запаха. В составе только природные компоненты. Не вызывает раздражение. Без добавок. Высокая температурная обработка без отбеливания.</p>
+               <p>Салфетки прочные стерилизованные ультрафиолетом. Изготовлены в соответствии с европейско-американским стандартам FDA \AP. Соответствует нормам пищевых стандартов FDA и стандартным требованиям к пищевым продуктам EU AP (2002).</p>
+               <p>Продукт приятный при контакте с кожей как в сухом, так и влажном состоянии.</p>
+               <p>Трёхслойная гигиеническая бамбуковая ткань — это тип супер-натуральной необработанной бамбуковой ткани, изготовленной из натуральных бамбуковых волокон без отбеливания или добавления флуоресцентного отбеливающего агента, диоксинов и вредных веществ.</p>
+               <ul>
+                 <li>Эко волокно — естественная профилактика от акарида, клопов и клещей.</li>
+                 <li>Уровень антибактериальной защиты может достигать 75% в течение 24 часов.</li>
+               </ul>
+               <p><strong>Сфера применения:</strong> уход в период менструации, удаление маслянистых жидкости – вода, уход при аллергических рините, уход за новорождёнными и беременными.</p>`,
+        images: ["/images/startsetgoods/paper1.webp", "/images/startsetgoods/paper2.webp"]
+      },
+      gel_laundry: {
+        title: "Многофункциональный гель для стирки (1кг)",
+        desc: `<ul>
+                 <li><strong>Эффективное удаление загрязнений:</strong> Гель iLiFE содержит комплекс активных энзимов, которые легко справляются с различными видами пятен, будь то грязь, пот, трава, масло или вино.</li>
+                 <li><strong>Бережное отношение к тканям:</strong> Не содержит агрессивных химических веществ, которые могут повредить волокна ткани.</li>
+                 <li><strong>Легкое полоскание:</strong> Гель легко растворяется в воде и не оставляет следов на одежде.</li>
+                 <li><strong>Безопасность:</strong> Не содержит фосфатов, флуоресцентных отбеливателей и других вредных веществ. Гипоаллергенен и подходит для людей с чувствительной кожей.</li>
+                 <li><strong>Экономичность:</strong> Гель концентрирован, поэтому его хватает надолго.</li>
+               </ul>`,
+        images: ["/images/startsetgoods/wash1.webp"]
+      },
+      dish_soap: {
+        title: "Жидкое средство для мытья посуды (1кг)",
+        desc: `<p>Моющее средство, предназначенное для мытья посуды и овощей/фруктов, сочетает в себе безопасность и эффективность. Основой средства служит очищенная вода, которая обеспечивает нежное воздействие на поверхности и безопасность для пищевых продуктов.</p>
+               <p>Кокосовое поверхностно-активное вещество в составе отличается мягкими очищающими свойствами, делая его идеальным для удаления жира и загрязнений как с посуды, так и с овощей и фруктов. Глицерин в составе ухаживает за кожей рук, предотвращая ее сухость и раздражение. Ароматизатор придает приятный и свежий аромат.</p>
+               <p>Средство является экологичным и безопасным выбором для ежедневного использования.</p>
+               <p><strong>Состав:</strong> Очищенная вода, кокосовое поверхностно-активное вещество, глицерин, ароматизатор.</p>`,
+        images: ["/images/startsetgoods/disheswash1.webp"]
+      },
+      sealuxe_sea: {
+        title: "Набор ухаживающей косметики «Морское цветение»",
+        desc: `<p>В основе серии — уникальный увлажняющий компонент VTMM. Извлеченный из соединений экзополисахаридов в микробиологии глубоководного вулканического канала ниже 3000 метров и уникальных антиоксидантных растений, он помогает воде транспортироваться к самому основанию кожи.</p>
+               <p>Благодаря VTMM каждый слой кожи становится увлажненным, эластичным и нежным; замедляется процесс старения кожи, и кожа сохраняет сияющий и молодой вид на протяжении долгого времени.</p>
+               <ul>
+                 <li><strong>Морской увлажняющий очищающий гель (100 g).</strong> Нежный очищающий гель с глубоководным увлажняющим фактором HydraSea Advanced Complex, который успокаивает, увлажняет и пробуждает кожу. Легко взбивается в нежнейшую пену, бережно снимает загрязнения, глубоко очищает поры.</li>
+                 <li><strong>Омолаживающий увлажняющий питательный тоник (120 ml).</strong> Инновационный фактор глубоководной конденсации HydraSeaCalmingComplex помогает улучшить перенос воды в роговой слой. Вертикальная увлажняющая система (VTMM) увлажняет каждый слой кожи, делая ее упругой, замедляет передачу факторов стресса и выравнивает тон кожи.</li>
+                 <li><strong>Интенсивный увлажняющий лосьон (60 ml).</strong> Частицы мягкого света осветляют потемнения, уменьшают морщины. Открывает внутренний водный канал кожи. Активная гиалуроновая кислота образует высокоэффективную водоотталкивающую пленку.</li>
+                 <li><strong>Морской увлажняющий крем с глубоким увлажняющим эффектом (50 g).</strong> Эффективно повышает защиту кожи от ультрафиолетовых лучей и успокаивает кожу. Трехмолекулярная вертикальная увлажняющая система (VTMM) открывает водные каналы в коже, помогая набирать влагу.</li>
+               </ul>`,
+        images: ["/images/startsetgoods/white1.webp", "/images/startsetgoods/white2.webp", "/images/startsetgoods/white3.webp", "/images/startsetgoods/white4.webp"]
+      },
+      kardli_cup: {
+        title: "Стакан Kardli для получения оздоровительной воды",
+        desc: `<p>Стакан Kardli сделает из обычной очищенной воды живую: активированную слабощелочную ионизированную воду с отрицательным ОВП.</p>
+               <p><strong>Такая вода обладает следующими характеристиками:</strong></p>
+               <ul>
+                 <li>не содержит опасных химических веществ</li>
+                 <li>не содержит болезнетворных бактерий</li>
+                 <li>обладает полезным минеральным составом, который необходим для жизнедеятельности организма</li>
+                 <li>вода структурирована, а значит, усвоение ее организмом займет гораздо меньше времени и энергии</li>
+                 <li>растворяет жир</li>
+                 <li>разрушает алкоголь</li>
+                 <li>меняет кислую среду воды на щелочную</li>
+                 <li>это вкусная и полезная питьевая вода для ежедневного применения.</li>
+               </ul>
+               <p>Доказано, что такая вода обладает повышенной проницаемостью сквозь клеточные мембраны и может растворять питательные вещества и доставлять их внутрь клеток, способствует улучшению состояния кожных покровов и очищению сосудов, повышает тонус организма, а также стимулирует иммунитет и регенерацию клеток.</p>
+               <p><strong>Особенности стакана Kardli:</strong></p>
+               <ul>
+                 <li>Немецкие технологии.</li>
+                 <li>Бесшовный воздухо- и пыленепроницаемый корпус.</li>
+                 <li>Усиленное дно. Гигиеничный.</li>
+                 <li>Качественный промежуточный теплоизоляционный слой: сохранит воду холодной летом и горячей зимой.</li>
+                 <li>Износостойкая и устойчивая к царапинам поверхность.</li>
+                 <li>Высокотехнологичный активный фильтр AST, выполненный из материала, имитирующего естественную экологическую среду минеральных фильтрующих веществ.</li>
+                 <li>Высокий, стильный, красивый и удобный дизайн. Предназначен только для воды.</li>
+               </ul>
+               <p><strong>Способ применения:</strong> Перед первым использованием открутить фильтр, прополоскать его и ненадолго поместить в емкость с водой. Прополоскать сам стакан горячей водой, но не кипятком. 150-200мл воды встряхиваем в стакане в течение 2 минут: 15 раз по горизонтали, 15 раз по вертикали, перевернуть стакан на 5-15 минут. Вода готова!</p>`,
+        images: ["/images/startsetgoods/kardlicup.webp"]
+      },
+      brush_carich: {
+        title: "Зубная щетка с гибкой и мягкой щетиной",
+        desc: `<p>Мягкая щетина обеспечивает бережную защиту десен.</p>
+               <p>Кончик щетины проникает глубоко в промежутки между зубами, очищая и заботясь о здоровье зубов.</p>
+               <p>Безопасна и удобна в использовании.</p>
+               <p>Стильная нескользящая ручка обеспечит удобный захват и сэкономит трудозатраты.</p>`,
+        images: ["/images/startsetgoods/teethbrush.webp"]
+      }
+    };
+
     const setCards = document.querySelectorAll('.set-card');
     const modals = document.querySelectorAll('.modal-overlay');
     const closeButtons = document.querySelectorAll('.modal-close');
+    const clickableItems = document.querySelectorAll('.clickable-item');
+    
+    const productModal = document.getElementById('productModal');
+    const closeProductModal = document.getElementById('closeProductModal');
+    const productTitle = document.getElementById('productTitle');
+    const productDesc = document.getElementById('productDesc');
+    const productImageTrack = document.getElementById('productImageTrack');
+    const prodPrev = document.getElementById('prodPrev');
+    const prodNext = document.getElementById('prodNext');
+
+    let currentProductImages = [];
+    let currentImageIndex = 0;
+
+    function updateProductImage() {
+      productImageTrack.style.transform = `translateX(-${currentImageIndex * 100}%)`;
+    }
 
     setCards.forEach(card => {
       card.addEventListener('click', () => {
         const targetId = card.getAttribute('data-target');
         const targetModal = document.getElementById(targetId);
-        if (targetModal) {
-          targetModal.classList.add('active');
-        }
+        if (targetModal) targetModal.classList.add('active');
       });
     });
 
@@ -370,6 +545,58 @@ import Base from '../layouts/Base.astro';
           modal.classList.remove('active');
         }
       });
+    });
+
+    clickableItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const prodId = item.getAttribute('data-product');
+        const data = productData[prodId];
+
+        if (data) {
+          productTitle.textContent = data.title;
+          productDesc.innerHTML = data.desc;
+          
+          productImageTrack.innerHTML = data.images.map(img => `
+            <div class="prod-slide"><img src="${img}" alt="${data.title}" /></div>
+          `).join('');
+
+          currentProductImages = data.images;
+          currentImageIndex = 0;
+          updateProductImage();
+
+          if (currentProductImages.length > 1) {
+            prodPrev.style.display = 'flex';
+            prodNext.style.display = 'flex';
+          } else {
+            prodPrev.style.display = 'none';
+            prodNext.style.display = 'none';
+          }
+
+          productModal.classList.add('active');
+        }
+      });
+    });
+
+    closeProductModal.addEventListener('click', (e) => {
+      e.stopPropagation();
+      productModal.classList.remove('active');
+    });
+
+    prodNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentImageIndex < currentProductImages.length - 1) {
+        currentImageIndex++;
+        updateProductImage();
+      }
+    });
+
+    prodPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentImageIndex > 0) {
+        currentImageIndex--;
+        updateProductImage();
+      }
     });
   </script>
 
@@ -472,239 +699,59 @@ import Base from '../layouts/Base.astro';
   .gallery-section h2 { text-align: center; margin-bottom: 10px; }
   .gallery-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem; }
 
-  .slider-wrapper {
-    max-width: 900px;
-    margin: 0 auto;
-  }
+  .slider-wrapper { max-width: 900px; margin: 0 auto; }
+  .slider-viewport { overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-card); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); }
+  .slider-track { display: flex; transition: transform 0.4s ease-in-out; width: 100%; }
+  .slider-slide { min-width: 100%; height: 500px; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .slider-slide img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
-  .slider-viewport {
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-    background: var(--bg-card);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  }
+  .slider-controls { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 20px; }
+  .slider-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text); font-size: 1.2rem; width: 40px; height: 40px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .slider-btn:hover { background: var(--brand-green); color: white; border-color: var(--brand-green); }
 
-  .slider-track {
-    display: flex;
-    transition: transform 0.4s ease-in-out;
-    width: 100%;
-  }
+  .slider-dots { display: flex; gap: 10px; }
+  .slider-dots button { width: 10px; height: 10px; border-radius: 50%; background: #cccccc; border: none; cursor: pointer; padding: 0; transition: all 0.3s ease; }
+  .slider-dots button.active { background: #179B49; width: 30px; border-radius: 5px; }
 
-  .slider-slide {
-    min-width: 100%;
-    height: 500px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .slider-slide img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-  }
-
-  .slider-controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    margin-top: 20px;
-  }
-
-  .slider-btn {
-    background: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text);
-    font-size: 1.2rem;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-  }
-
-  .slider-btn:hover {
-    background: var(--brand-green);
-    color: white;
-    border-color: var(--brand-green);
-  }
-
-  .slider-dots {
-    display: flex;
-    gap: 10px;
-  }
-
-    .slider-dots button {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #cccccc;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    transition: all 0.3s ease;
-  }
-
-  .slider-dots button.active {
-    background: #179B49;
-    width: 30px;
-    border-radius: 5px;
-  }
-
-  .slider-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #cccccc;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    transition: all 0.3s ease;
-  }
-
-  .slider-dot.active {
-    background: #179B49;
-    width: 30px;
-    border-radius: 5px;
-  }
-
-    /* --- Стили для стартовых наборов --- */
   .start-sets { padding: 80px 0; background: var(--bg-body); }
   .start-sets h2 { text-align: center; margin-bottom: 10px; }
   .sets-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem; }
 
-  .sets-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    max-width: 1000px;
-    margin: 0 auto;
-  }
+  .sets-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1000px; margin: 0 auto; }
+  .set-card { background: var(--bg-card); border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+  .set-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); border-color: var(--brand-green); }
+  .set-image { height: 250px; overflow: hidden; border-bottom: 1px solid var(--border-color); }
+  .set-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+  .set-card:hover .set-image img { transform: scale(1.05); }
+  .set-info { padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+  .set-info h3 { margin: 0; font-size: 1.2rem; text-align: center; }
 
-  .set-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    display: flex;
-    flex-direction: column;
-  }
+  .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+  .modal-overlay.active { opacity: 1; visibility: visible; }
+  .modal-content { background: var(--bg-card); padding: 40px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; border-top: 4px solid var(--brand-green); transform: translateY(20px); transition: transform 0.3s; }
+  .modal-overlay.active .modal-content { transform: translateY(0); }
+  .modal-close { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--text-muted); line-height: 1; }
+  .modal-close:hover { color: var(--brand-green); }
+  .modal-content h3 { margin-top: 0; margin-bottom: 20px; color: var(--text); }
+  .modal-content p { color: var(--text-muted); margin-bottom: 20px; }
+  
+  .product-list { list-style-type: none; padding-left: 0; }
+  .clickable-item { padding: 10px 15px; background: var(--bg-body); margin-bottom: 8px; cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent; }
+  .clickable-item:hover { background: var(--brand-green-light); border-left-color: var(--brand-green); color: var(--brand-green-dark); }
 
-  .set-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    border-color: var(--brand-green);
-  }
-
-  .set-image {
-    height: 250px;
-    overflow: hidden;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .set-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s;
-  }
-
-  .set-card:hover .set-image img {
-    transform: scale(1.05);
-  }
-
-  .set-info {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .set-info h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    text-align: center;
-  }
-
-  /* --- Стили для модального окна --- */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-  }
-
-  .modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .modal-content {
-    background: var(--bg-card);
-    padding: 40px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    border-top: 4px solid var(--brand-green);
-    transform: translateY(20px);
-    transition: transform 0.3s;
-  }
-
-  .modal-overlay.active .modal-content {
-    transform: translateY(0);
-  }
-
-  .modal-close {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    background: none;
-    border: none;
-    font-size: 2rem;
-    cursor: pointer;
-    color: var(--text-muted);
-    line-height: 1;
-  }
-
-  .modal-close:hover {
-    color: var(--brand-green);
-  }
-
-  .modal-content h3 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: var(--text);
-  }
-
-  .modal-content p {
-    color: var(--text-muted);
-    margin-bottom: 20px;
-  }
-
-  .modal-content ul {
-    padding-left: 20px;
-    color: var(--text);
-  }
-
-  .modal-content li {
-    margin-bottom: 10px;
-  }
+  .product-modal-content { max-width: 800px; }
+  .product-slider { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #f0f0f0; margin-bottom: 20px; }
+  .product-slider-track { display: flex; transition: transform 0.3s ease-in-out; height: 100%; }
+  .prod-slide { min-width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .prod-slide img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .product-prev { position: absolute; top: 50%; left: 10px; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; width: 40px; height: 40px; z-index: 10; }
+  .product-next { position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: rgba(255,255,255,0.8); border: none; width: 40px; height: 40px; z-index: 10; }
+  
+  .product-desc { font-size: 0.95rem; line-height: 1.6; color: var(--text-muted); }
+  .product-desc p { margin-bottom: 15px; }
+  .product-desc ul, .product-desc ol { margin-bottom: 15px; padding-left: 20px; }
+  .product-desc li { margin-bottom: 5px; }
+  .product-desc strong { color: var(--text); }
 
   .cta { background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center; padding: 60px 0; }
   .cta p { color: var(--text-muted); max-width: 500px; margin: 0 auto 24px; }
