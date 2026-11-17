@@ -20,64 +20,64 @@ import Footer from '../components/Footer.astro';
 </html>
 
 <style is:global>
-:root {
-  --brand-green: #179B49;
-  --brand-green-dark: #00682E;
-  --brand-green-light: #F3F4F6;
-  
-  --bg-body: #F3F4F6;
-  --bg-card: #FFFFFF;
-  
-  --text: #1a1a1a;
-  --text-muted: #5a6b60;
-  
-  --border-color: #e0e8e2;
-  --gold: #d4a02a;
-}
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color: var(--text);
-  background: var(--bg-body);
-  line-height: 1.6;
-}
-
-a { color: var(--brand-green); text-decoration: none; transition: color 0.2s; }
-a:hover { color: var(--brand-green-dark); }
-.container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
-
-h1, h2, h3 { color: var(--text); line-height: 1.2; }
-h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 20px; }
-h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: 0 0 16px; }
-
-/* Кнопки */
-.btn {
-  display: inline-block;
-  padding: 12px 24px;
-  background: var(--brand-green);
-  color: white;
-  border-radius: 0; /* Острые углы */
-  font-weight: 600;
-  transition: background 0.2s;
-  border: 2px solid transparent;
-}
-.btn:hover { background: var(--brand-green-dark); color: white; }
-
-.btn-outline {
-  background: transparent;
-  color: var(--brand-green);
-  border: 2px solid var(--brand-green);
-}
-.btn-outline:hover { background: var(--brand-green); color: white; }
-
-.bg-light-green {
-    background-color: #eaf3ee;
-    border-top: 1px solid #dce8e1;
-    border-bottom: 1px solid #dce8e1;
+  :root {
+    --brand-green: #179B49;
+    --brand-green-dark: #00682E;
+    --brand-green-light: #eaf3ee;
+    
+    --bg-body: #F3F4F6;
+    --bg-card: #FFFFFF;
+    
+    --text: #1a1a1a;
+    --text-muted: #5a6b60;
+    
+    --border-color: #e0e8e2;
+    --gold: #d4a02a;
   }
 
-section { padding: 60px 0; }
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg-body);
+    line-height: 1.6;
+  }
+
+  a { color: var(--brand-green); text-decoration: none; transition: color 0.2s; }
+  a:hover { color: var(--brand-green-dark); }
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+  h1, h2, h3 { color: var(--text); line-height: 1.2; }
+  h1 { font-size: clamp(2rem, 4vw, 3rem); margin: 0 0 20px; }
+  h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); margin: 0 0 16px; }
+
+  .btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: var(--brand-green);
+    color: white;
+    border-radius: 0;
+    font-weight: 600;
+    transition: background 0.2s;
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--brand-green-dark); color: white; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--brand-green);
+    border: 2px solid var(--brand-green);
+  }
+  .btn-outline:hover { background: var(--brand-green); color: white; }
+
+  section { padding: 60px 0; }
+
+  .bg-light-green {
+    background-color: var(--brand-green-light);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
 </style>

@@ -2,56 +2,48 @@
 import Base from '../layouts/Base.astro';
 import products from '../data/products.json';
 
-const categories = [
-  { key: 'sealuxe', name: 'SEALUXE', desc: 'Премиальный уход за кожей' },
-  { key: 'carich', name: 'Carich', desc: 'Витамины и БАДы' },
-  { key: 'ilife', name: 'iLiFE', desc: 'Товары для здоровья и дома' },
-  { key: 'marvisia', name: 'Marvisia', desc: 'Одежда и аксессуары' },
-];
 const featured = products.filter(p => p.featured).slice(0, 3);
 ---
 <Base title="Сервисный центр Greenleaf в Геленджике — Здоровье и красота">
+  
   <section class="hero">
     <div class="container hero-inner">
       <div class="hero-text">
         <span class="eyebrow">НАТАЛИЯ ТОЛОКНОВА, VIP-ПАРТНЁР</span>
         <h1>Здоровье, красота и качество жизни — вместе с Greenleaf</h1>
         <p>Представляем продукцию международной компании Greenleaf</p>
-        
         <div class="hero-actions">
           <a href="/catalog" class="btn">Смотреть каталог</a>
           <a href="/about" class="btn btn-outline">О компании</a>
         </div>
       </div>
       <div class="hero-visual">
-  <div class="hero-image-wrapper">
-    <img src="/i.png" alt="Сервисный центр Greenleaf" />
-  </div>
-</div>
+        <div class="hero-image-wrapper">
+          <img src="/i.png" alt="Сервисный центр Greenleaf" />
+        </div>
+      </div>
     </div>
   </section>
+
+  <div class="divider"></div>
 
   <section class="video-section bg-light-green">
     <div class="container">
       <h2>Презентация компании</h2>
       <div class="video-wrapper">
-        <video 
-          controls 
-          controlsList="nodownload" 
-          poster="/logo.svg" 
-          preload="metadata"
-        >
+        <video controls controlsList="nodownload" preload="metadata">
           <source src="/preza.mp4" type="video/mp4" />
         </video>
       </div>
     </div>
   </section>
 
+  <div class="divider"></div>
+
   <section class="company-info">
     <div class="container">
       <h2>Философия Greenleaf</h2>
       <div class="grid-info">
-        
         <div class="info-card">
           <div class="info-icon">
             <img src="/favicon.png" alt="Стратегия" />
@@ -59,7 +51,6 @@ const featured = products.filter(p => p.featured).slice(0, 3);
           <h3>Стратегия компании</h3>
           <p>Распространение высококачественной продукции по разумной цене на мировом рынке.</p>
         </div>
-
         <div class="info-card">
           <div class="info-icon">
             <img src="/favicon.png" alt="Миссия" />
@@ -67,7 +58,6 @@ const featured = products.filter(p => p.featured).slice(0, 3);
           <h3>Миссия компании</h3>
           <p>Сделать людей счастливее, здоровее, красивее и богаче.</p>
         </div>
-
         <div class="info-card">
           <div class="info-icon">
             <img src="/favicon.png" alt="Ценности" />
@@ -75,7 +65,6 @@ const featured = products.filter(p => p.featured).slice(0, 3);
           <h3>Ценности компании</h3>
           <p>Гармония, альтруизм по отношению к себе, честность, преданность делу, полная отдача и инновация.</p>
         </div>
-
         <div class="info-card">
           <div class="info-icon">
             <img src="/favicon.png" alt="Программа" />
@@ -83,10 +72,11 @@ const featured = products.filter(p => p.featured).slice(0, 3);
           <h3>Программа компании</h3>
           <p>Стать лучшим работодателем на мировом уровне, крупнейшей платформой качественных продуктов.</p>
         </div>
-
       </div>
     </div>
   </section>
+
+  <div class="divider"></div>
 
   <section class="featured bg-light-green">
     <div class="container">
@@ -108,6 +98,8 @@ const featured = products.filter(p => p.featured).slice(0, 3);
     </div>
   </section>
 
+  <div class="divider"></div>
+
   <section class="cta">
     <div class="container">
       <h2>Хотите узнать больше?</h2>
@@ -115,9 +107,17 @@ const featured = products.filter(p => p.featured).slice(0, 3);
       <a href="/contacts" class="btn">Написать мне</a>
     </div>
   </section>
+
 </Base>
 
 <style>
+  .hero { padding: 80px 0; background: var(--bg-body); }
+  .hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .eyebrow { display: inline-block; color: var(--brand-green); font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .hero-text p { font-size: 1.1rem; color: var(--text-muted); margin: 0 0 28px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  
+  .hero-visual { display: flex; justify-content: center; align-items: center; }
   .hero-image-wrapper {
     width: 100%;
     max-width: 450px;
@@ -125,45 +125,51 @@ const featured = products.filter(p => p.featured).slice(0, 3);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
     margin: 0 auto;
   }
+  .hero-image-wrapper img { width: 100%; height: auto; display: block; object-fit: cover; }
 
-  .hero-image-wrapper img {
-    width: 100%;
-    height: auto;
-    display: block;
-    object-fit: cover;
+  .divider {
+    height: 1px;
+    background-color: var(--border-color);
+    max-width: 1120px;
+    margin: 0 auto;
   }
-  .hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-  .eyebrow { display: inline-block; color: var(--green-700); font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
-  .hero-text p { font-size: 1.1rem; color: var(--muted); margin: 0 0 28px; }
-  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
-  .hero-visual { display: flex; justify-content: center; align-items: center; }
-  .hero-avatar {
-    width: 320px;
-    height: 320px;
-    border-radius: 50%;
+
+  .video-section h2 { text-align: center; margin-bottom: 30px; }
+  .video-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
-    border: 4px solid var(--green-700);
-    box-shadow: 0 10px 30px rgba(15, 31, 22, 0.15);
-    background-color: var(--green-100);
   }
 
-  .hero-avatar img {
+  .video-inner {
+    position: relative;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+    aspect-ratio: 16 / 9; 
+    overflow: hidden;
   }
 
-  .company-info {
-    background-color: transparent;
+  .video-wrapper video { 
+    display: block; 
+    width: 100%; 
+    height: auto; 
+    outline: none; 
+  }
+  
+  .video-wrapper video::-webkit-media-controls-panel {
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .video-wrapper video:hover::-webkit-media-controls-panel {
+    opacity: 1;
   }
 
-  .grid-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-  }
-
+  .grid-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
   .info-card {
     background: var(--bg-card);
     padding: 30px 24px;
@@ -174,72 +180,32 @@ const featured = products.filter(p => p.featured).slice(0, 3);
     transition: transform 0.2s, box-shadow 0.2s;
     text-align: center;
   }
+  .info-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05); }
+  .info-icon { height: 60px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; }
+  .info-icon img { height: 100%; width: auto; object-fit: contain; }
+  .info-card h3 { font-size: 1.1rem; margin: 0 0 12px 0; color: var(--text); text-transform: uppercase; letter-spacing: 0.5px; min-height: 3.2rem; display: flex; align-items: center; justify-content: center; }
+  .info-card p { color: var(--text-muted); font-size: 0.9rem; margin: 0; line-height: 1.5; }
 
-  .info-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-  }
-
-  .info-icon {
-    height: 60px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center; 
-  }
-
-  .info-icon img {
-    height: 100%;
-    width: auto;
-    object-fit: contain;
-  }
-
-  .info-card h3 {
-    font-size: 1.1rem;
-    margin: 0 0 12px 0;
-    color: var(--text);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  .info-card p {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin: 0;
-    line-height: 1.5;
-  }
-  .mini-card { background: white; padding: 24px; border-radius: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); height: 100%; transition: all 0.2s; border-left: 4px solid var(--gold); }
-  .mini-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
-  .mini-card h3 { margin: 0 0 8px; font-size: 1.05rem; }
-  .mini-card p { margin: 0 0 12px; color: var(--muted); font-size: 0.9rem; }
-  .category-tag { display: inline-block; background: var(--green-100); color: var(--green-900); padding: 4px 10px; border-radius: 0; font-size: 0.8rem; font-weight: 600; }
-  .cta { background: var(--green-100); text-align: center; }
-  .cta p { color: var(--muted); max-width: 500px; margin: 0 auto 24px; }
-
-  .video-section {
-    padding: 40px 0;
-    background-color: var(--bg-body);
-  }
-
-  .video-section h2 {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-
-  .video-wrapper {
-    max-width: 800px;
-    margin: 0 auto;
+  .grid-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .card-link { color: inherit; }
+  .mini-card {
+    background: var(--bg-card);
+    padding: 24px;
     border: 1px solid var(--border-color);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    background: #000;
+    border-left: 4px solid var(--gold);
+    height: 100%;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
   }
+  .mini-card:hover { transform: translateY(-3px); border-color: var(--gold); }
+  .mini-card h3 { margin: 0 0 8px; font-size: 1.05rem; color: var(--text); }
+  .mini-card p { margin: 0 0 12px; color: var(--text-muted); font-size: 0.9rem; flex-grow: 1; }
+  .category-tag { display: inline-block; background: transparent; color: var(--brand-green); border: 1px solid var(--brand-green); padding: 4px 10px; font-size: 0.8rem; font-weight: 600; align-self: flex-start; }
 
-  .video-wrapper video {
-    display: block;
-    width: 100%;
-    height: auto;
-    outline: none;
-  }
+  .cta { background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center; }
+  .cta p { color: var(--text-muted); max-width: 500px; margin: 0 auto 24px; }
+
   @media (max-width: 768px) {
     .hero-inner { grid-template-columns: 1fr; }
     .hero-visual { display: none; }
