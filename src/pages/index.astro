@@ -88,20 +88,10 @@ import Base from '../layouts/Base.astro';
 
   <div class="divider"></div>
 
-  <section class="cta">
-    <div class="container">
-      <h2>Хотите узнать больше?</h2>
-      <p>Свяжитесь со мной — расскажу о продукции и возможностях бизнеса с Greenleaf.</p>
-      <a href="/contacts" class="btn">Написать мне</a>
-    </div>
-  </section>
-
-  <div class="divider"></div>
-
   <section class="partnership">
     <div class="container">
       <div class="partnership-header">
-        <span class="eyebrow">КАК СТАТЬ ПАРТНЁРОМ GREENLEAF</span>
+        <span class="eyebrow">БИЗНЕС С GREENLEAF</span>
         <h2>Как стать партнёром и начать получать доход</h2>
         <p class="lead">Знаете ли вы, что на товарах, которыми мы пользуемся ежедневно, можно построить прибыльный бизнес? Один раз выбираем и оплачиваем стартовый пакет — и запускаем свой доход.</p>
       </div>
@@ -138,9 +128,142 @@ import Base from '../layouts/Base.astro';
     </div>
   </section>
 
+  <div class="divider"></div>
+
+  <section class="gallery-section bg-light-green">
+    <div class="container">
+      <h2>Всё для вашей красоты, уюта и здоровья</h2>
+      <p class="gallery-subtitle">Широкий ассортимент качественных продуктов по доступным ценам</p>
+      
+      <div class="slider-wrapper">
+        <div class="slider-viewport">
+          <div class="slider-track" id="sliderTrack">
+            <div class="slider-slide"><img src="/images/1.webp" alt="Продукт 1" /></div>
+            <div class="slider-slide"><img src="/images/2.webp" alt="Продукт 2" /></div>
+            <div class="slider-slide"><img src="/images/3.webp" alt="Продукт 3" /></div>
+            <div class="slider-slide"><img src="/images/4.webp" alt="Продукт 4" /></div>
+            <div class="slider-slide"><img src="/images/5.webp" alt="Продукт 5" /></div>
+            <div class="slider-slide"><img src="/images/6.webp" alt="Продукт 6" /></div>
+            <div class="slider-slide"><img src="/images/7.webp" alt="Продукт 7" /></div>
+            <div class="slider-slide"><img src="/images/8.webp" alt="Продукт 8" /></div>
+            <div class="slider-slide"><img src="/images/9.webp" alt="Продукт 9" /></div>
+            <div class="slider-slide"><img src="/images/10.webp" alt="Продукт 10" /></div>
+            <div class="slider-slide"><img src="/images/11.webp" alt="Продукт 11" /></div>
+            <div class="slider-slide"><img src="/images/12.webp" alt="Продукт 12" /></div>
+            <div class="slider-slide"><img src="/images/13.webp" alt="Продукт 13" /></div>
+            <div class="slider-slide"><img src="/images/14.webp" alt="Продукт 14" /></div>
+            <div class="slider-slide"><img src="/images/15.webp" alt="Продукт 15" /></div>
+            <div class="slider-slide"><img src="/images/16.webp" alt="Продукт 16" /></div>
+            <div class="slider-slide"><img src="/images/17.webp" alt="Продукт 17" /></div>
+            <div class="slider-slide"><img src="/images/18.webp" alt="Продукт 18" /></div>
+            <div class="slider-slide"><img src="/images/19.webp" alt="Продукт 19" /></div>
+            <div class="slider-slide"><img src="/images/20.webp" alt="Продукт 20" /></div>
+            <div class="slider-slide"><img src="/images/21.webp" alt="Продукт 21" /></div>
+            <div class="slider-slide"><img src="/images/22.webp" alt="Продукт 22" /></div>
+            <div class="slider-slide"><img src="/images/23.webp" alt="Продукт 23" /></div>
+            <div class="slider-slide"><img src="/images/24.webp" alt="Продукт 24" /></div>
+            <div class="slider-slide"><img src="/images/25.webp" alt="Продукт 25" /></div>
+            <div class="slider-slide"><img src="/images/26.webp" alt="Продукт 26" /></div>
+            <div class="slider-slide"><img src="/images/27.webp" alt="Продукт 27" /></div>
+          </div>
+        </div>
+        
+        <div class="slider-controls">
+          <button class="slider-btn" id="prevBtn">❮</button>
+          <div class="slider-dots" id="sliderDots"></div>
+          <button class="slider-btn" id="nextBtn">❯</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Хотите узнать больше?</h2>
+      <p>Свяжитесь со мной — расскажу о продукции и возможностях бизнеса с Greenleaf.</p>
+      <a href="/contacts" class="btn">Написать мне</a>
+    </div>
+  </section>
+
+  <script is:inline>
+    function initSlider() {
+      const track = document.getElementById('sliderTrack');
+      const slides = document.querySelectorAll('.slider-slide');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const dotsContainer = document.getElementById('sliderDots');
+      
+      if (!track || !prevBtn || !nextBtn || !dotsContainer) return;
+
+      let currentIndex = 0;
+      const totalSlides = slides.length;
+
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.classList.add('slider-dot');
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => goToSlide(i));
+        dotsContainer.appendChild(dot);
+      }
+
+      const dots = document.querySelectorAll('.slider-dot');
+
+      function updateSlider() {
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        dots.forEach((dot, index) => {
+          if (index === currentIndex) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+
+      function goToSlide(index) {
+        currentIndex = index;
+        updateSlider();
+        resetTimer();
+      }
+
+      function nextSlide() {
+        currentIndex = (currentIndex + 1) % totalSlides;
+        updateSlider();
+      }
+
+      function prevSlide() {
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        updateSlider();
+      }
+
+      nextBtn.addEventListener('click', () => { nextSlide(); resetTimer(); });
+      prevBtn.addEventListener('click', () => { prevSlide(); resetTimer(); });
+
+      let autoPlayInterval = setInterval(nextSlide, 5000);
+
+      function resetTimer() {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = setInterval(nextSlide, 5000);
+      }
+
+      const sliderContainer = document.querySelector('.slider-wrapper');
+      if (sliderContainer) {
+        sliderContainer.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+        sliderContainer.addEventListener('mouseleave', () => { autoPlayInterval = setInterval(nextSlide, 5000); });
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSlider);
+    } else {
+      initSlider();
+    }
+  </script>
+
 </Base>
 
-<style>
+<style is:global>
   .hero { padding: 80px 0; background: var(--bg-body); }
   .hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
   .eyebrow { display: inline-block; color: var(--brand-green); font-weight: 600; font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
@@ -210,33 +333,11 @@ import Base from '../layouts/Base.astro';
   .info-card h3 { font-size: 1.1rem; margin: 0 0 12px 0; color: var(--text); text-transform: uppercase; letter-spacing: 0.5px; min-height: 3.2rem; display: flex; align-items: center; justify-content: center; }
   .info-card p { color: var(--text-muted); font-size: 0.9rem; margin: 0; line-height: 1.5; }
 
-  .cta { background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center; }
-  .cta p { color: var(--text-muted); max-width: 500px; margin: 0 auto 24px; }
-
-  .partnership { 
-    background: var(--bg-body); 
-    padding: 80px 0;
-  }
-
-  .partnership-header { 
-    max-width: 800px; 
-    margin: 0 auto 50px; 
-    text-align: center; 
-  }
+  .partnership { background: var(--bg-body); padding: 80px 0; }
+  .partnership-header { max-width: 800px; margin: 0 auto 50px; text-align: center; }
+  .partnership-header .lead { font-size: 1.1rem; color: var(--text-muted); margin-top: 15px; }
   
-  .partnership-header .lead { 
-    font-size: 1.1rem; 
-    color: var(--text-muted); 
-    margin-top: 15px; 
-  }
-  
-  .steps-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-    gap: 30px; 
-    margin-bottom: 50px; 
-  }
-
+  .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 50px; }
   .step-card {
     background: var(--bg-card);
     padding: 30px;
@@ -247,61 +348,126 @@ import Base from '../layouts/Base.astro';
     flex-direction: column;
     align-items: flex-start;
   }
+  .step-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); }
+  .step-icon { width: 32px; height: 32px; color: var(--brand-green); margin-bottom: 20px; }
+  .step-icon svg { width: 100%; height: 100%; }
+  .step-card h3 { font-size: 1.2rem; margin: 0 0 15px 0; color: var(--text); }
+  .step-card p { color: var(--text-muted); margin: 0; font-size: 0.95rem; line-height: 1.6; }
+  .step-card strong { color: var(--text); font-weight: 700; }
+  .partnership-action { text-align: center; }
 
-  .step-card:hover { 
-    transform: translateY(-5px); 
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  .gallery-section { padding: 80px 0; }
+  .gallery-section h2 { text-align: center; margin-bottom: 10px; }
+  .gallery-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 40px; font-size: 1.1rem; }
+
+  .slider-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
   }
 
-  .step-icon {
-    width: 32px;
-    height: 32px;
-    color: var(--brand-green);
-    margin-bottom: 20px;
+  .slider-viewport {
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   }
 
-  .step-icon svg {
+  .slider-track {
+    display: flex;
+    transition: transform 0.4s ease-in-out;
     width: 100%;
-    height: 100%;
   }
 
-  .step-card h3 { 
-    font-size: 1.2rem; 
-    margin: 0 0 15px 0; 
-    color: var(--text); 
+  .slider-slide {
+    min-width: 100%;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
   }
 
-  .step-card p { 
-    color: var(--text-muted); 
-    margin: 0; 
-    font-size: 0.95rem; 
-    line-height: 1.6; 
+  .slider-slide img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
   }
 
-  .step-card strong { 
-    color: var(--text); 
-    font-weight: 700;
+  .slider-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
   }
 
-  .partnership-action { 
-    text-align: center; 
+  .slider-btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text);
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
   }
 
-  .btn-gold { 
-    background: var(--gold); 
-    border-color: var(--gold); 
-    color: #fff; 
+  .slider-btn:hover {
+    background: var(--brand-green);
+    color: white;
+    border-color: var(--brand-green);
   }
 
-  .btn-gold:hover { 
-    background: #b8860b; 
-    border-color: #b8860b; 
-    color: #fff; 
+  .slider-dots {
+    display: flex;
+    gap: 10px;
   }
+
+    .slider-dots button {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cccccc;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+  }
+
+  .slider-dots button.active {
+    background: #179B49;
+    width: 30px;
+    border-radius: 5px;
+  }
+
+  .slider-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #cccccc;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.3s ease;
+  }
+
+  .slider-dot.active {
+    background: #179B49;
+    width: 30px;
+    border-radius: 5px;
+  }
+
+  .cta { background: var(--bg-card); border-top: 1px solid var(--border-color); text-align: center; padding: 60px 0; }
+  .cta p { color: var(--text-muted); max-width: 500px; margin: 0 auto 24px; }
 
   @media (max-width: 768px) {
     .hero-inner { grid-template-columns: 1fr; }
     .hero-visual { display: none; }
     .hero { padding: 50px 0; }
+    .slider-slide { height: 300px; }
+    .slider-btn { width: 36px; height: 36px; font-size: 1rem; }
   }
 </style>
