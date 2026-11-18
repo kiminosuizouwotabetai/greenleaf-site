@@ -16,7 +16,7 @@ import Base from '../layouts/Base.astro';
       </div>
       <div class="hero-visual">
         <div class="hero-image-wrapper">
-          <img src="/i.png" alt="Сервисный центр Greenleaf" />
+          <img src="/i.webp" alt="Наталия Толокнова" />
         </div>
       </div>
     </div>
@@ -331,7 +331,7 @@ import Base from '../layouts/Base.astro';
   </section>
 
   <script is:inline>
-    function initSlider() {
+        function initSlider() {
       const track = document.getElementById('sliderTrack');
       const slides = document.querySelectorAll('.slider-slide');
       const prevBtn = document.getElementById('prevBtn');
@@ -342,12 +342,16 @@ import Base from '../layouts/Base.astro';
 
       let currentIndex = 0;
       const totalSlides = slides.length;
+      const intervalTime = 6000;
+      let autoPlayInterval;
 
       for (let i = 0; i < totalSlides; i++) {
         const dot = document.createElement('button');
         dot.classList.add('slider-dot');
         if (i === 0) dot.classList.add('active');
-        dot.addEventListener('click', () => goToSlide(i));
+        dot.addEventListener('click', () => {
+          goToSlide(i);
+        });
         dotsContainer.appendChild(dot);
       }
 
@@ -367,7 +371,6 @@ import Base from '../layouts/Base.astro';
       function goToSlide(index) {
         currentIndex = index;
         updateSlider();
-        resetTimer();
       }
 
       function nextSlide() {
@@ -380,21 +383,41 @@ import Base from '../layouts/Base.astro';
         updateSlider();
       }
 
-      nextBtn.addEventListener('click', () => { nextSlide(); resetTimer(); });
-      prevBtn.addEventListener('click', () => { prevSlide(); resetTimer(); });
-
-      let autoPlayInterval = setInterval(nextSlide, 5000);
-
-      function resetTimer() {
-        clearInterval(autoPlayInterval);
-        autoPlayInterval = setInterval(nextSlide, 5000);
+      function startAutoPlay() {
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
+        autoPlayInterval = setInterval(nextSlide, intervalTime);
       }
+
+      function stopAutoPlay() {
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
+      }
+
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        stopAutoPlay();
+        startAutoPlay();
+      });
+
+      prevBtn.addEventListener('click', () => {
+        prevSlide();
+        stopAutoPlay();
+        startAutoPlay();
+      });
+
+      dotsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('slider-dot')) {
+          stopAutoPlay();
+          startAutoPlay();
+        }
+      });
 
       const sliderContainer = document.querySelector('.slider-wrapper');
       if (sliderContainer) {
-        sliderContainer.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
-        sliderContainer.addEventListener('mouseleave', () => { autoPlayInterval = setInterval(nextSlide, 5000); });
+        sliderContainer.addEventListener('mouseenter', stopAutoPlay);
+        sliderContainer.addEventListener('mouseleave', startAutoPlay);
       }
+
+      startAutoPlay();
     }
 
     if (document.readyState === 'loading') {
