@@ -122,8 +122,49 @@ import Base from '../layouts/Base.astro';
         </div>
       </div>
 
+      <div class="bonus-scheme">
+        <h3>Бинарная партнёрская структура</h3>
+        
+        <div class="svg-container">
+            <svg viewBox="0 0 500 300" class="scheme-svg">
+            <!-- Линии -->
+            <line x1="250" y1="60" x2="100" y2="220" stroke="var(--brand-green)" stroke-width="2" />
+            <line x1="250" y1="60" x2="400" y2="220" stroke="var(--brand-green)" stroke-width="2" />
+            <!-- Центральная высота -->
+            <line x1="250" y1="60" x2="250" y2="220" stroke="var(--brand-green)" stroke-width="2" />
+            <!-- Нижняя горизонтальная линия -->
+            <line x1="100" y1="220" x2="400" y2="220" stroke="var(--brand-green)" stroke-width="2" stroke-dasharray="5,5" />
+
+            <!-- 5852 вдоль центральной линии -->
+                        <text x="242" y="155" text-anchor="middle" fill="var(--brand-green-dark)" font-weight="bold" font-size="16" transform="rotate(-90, 242, 155)">5852</text>
+            
+            <!-- 1828 на нижней стороне по центру -->
+            <text x="250" y="245" text-anchor="middle" fill="var(--brand-green-dark)" font-weight="bold" font-size="16">1828</text>
+
+            <!-- Круги поверх линий -->
+            <!-- Верхний круг -->
+            <circle cx="250" cy="60" r="35" fill="var(--bg-card)" stroke="var(--brand-green)" stroke-width="2" />
+            <text x="250" y="66" text-anchor="middle" fill="var(--brand-green-dark)" font-weight="bold" font-size="16">28900</text>
+
+            <!-- Левый нижний круг -->
+            <circle cx="100" cy="220" r="35" fill="var(--bg-card)" stroke="var(--brand-green)" stroke-width="2" />
+            <text x="100" y="226" text-anchor="middle" fill="var(--brand-green-dark)" font-weight="bold" font-size="16">914</text>
+
+            <!-- Правый нижний круг -->
+            <circle cx="400" cy="220" r="35" fill="var(--bg-card)" stroke="var(--brand-green)" stroke-width="2" />
+            <text x="400" y="226" text-anchor="middle" fill="var(--brand-green-dark)" font-weight="bold" font-size="16">914</text>
+          </svg>
+        </div>
+
+        <div class="total-sum">
+          Сумма к выплате: <strong>9 508 рублей</strong>
+        </div>
+        
+        <p class="scheme-desc">Схема наглядно показывает распределение прибыли. Значения указаны в рублях.</p>
+      </div>
+
       <div class="partnership-action">
-        <a href="/contacts" class="btn">Узнать подробности</a>
+        <a href="/contacts" class="btn">Свяжитесь со мной, чтобы узнать подробности</a>
       </div>
     </div>
   </section>
@@ -763,6 +804,68 @@ import Base from '../layouts/Base.astro';
   .gallery-section h2 { 
     text-align: center; 
     margin-bottom: 30px; 
+  }
+
+   .bonus-scheme {
+    margin: 50px auto;
+    max-width: 600px;
+    text-align: center;
+    padding: 40px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-top: 4px solid var(--brand-green);
+  }
+  
+  .bonus-scheme h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--text);
+    font-size: 1.4rem;
+  }
+
+  .svg-container {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  .scheme-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+    .total-sum {
+    margin-top: 30px;
+    padding: 15px;
+    background: var(--brand-green-light);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--brand-green);
+    font-size: 1.1rem;
+    color: var(--text);
+    text-align: center;
+  }
+
+  .total-sum strong {
+    color: var(--brand-green-dark);
+    font-size: 1.2rem;
+  }
+
+  .scheme-desc {
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  @media (max-width: 600px) {
+    .node-circle {
+      width: 60px;
+      height: 60px;
+      font-size: 1rem;
+    }
+    .left-line { width: 170px; top: 30px; transform: translateX(-100%) rotate(56deg); }
+    .right-line { width: 170px; top: 30px; transform: rotate(124deg); }
+    .center-line { height: 165px; top: 30px; }
+    .left-line .line-text { left: 30px; }
   }
 
   @media (max-width: 768px) {

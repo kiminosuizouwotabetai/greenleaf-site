@@ -1,5 +1,9 @@
 ---
-const current = Astro.url.pathname;
+let current = Astro.url.pathname;
+if (current !== '/' && current.endsWith('/')) {
+  current = current.slice(0, -1);
+}
+
 const links = [
   { href: '/', label: 'Главная' },
   { href: '/catalog', label: 'Каталог' },
@@ -11,7 +15,14 @@ const links = [
   <div class="container header-inner">
     <a href="/" class="logo"><img src="/logo.svg" alt="Greenleaf" class="logo-img" /></a>
     <nav>
-      {links.map(l => <a href={l.href} class:list={[{ active: current === l.href }]}>{l.label}</a>)}
+      {links.map(l => {
+        const isActive = current === l.href || (l.href !== '/' && current.startsWith(l.href));
+        return (
+          <a href={l.href} class:list={[{ active: isActive }]}>
+            {l.label}
+          </a>
+        );
+      })}
     </nav>
   </div>
 </header>
@@ -20,14 +31,43 @@ const links = [
   .site-header { background: white; border-bottom: 1px solid #e8e8e0; position: sticky; top: 0; z-index: 100; }
   .header-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
   .logo { font-size: 1.3rem; font-weight: 700; color: var(--green-900); display: flex; align-items: center; gap: 8px; }
-  .logo-img {
-  height: 50px;
-  width: auto;
-  display: block;
-}
-  nav { display: flex; gap: 28px; }
-  nav a { color: var(--text); font-weight: 500; font-size: 0.95rem; }
-  nav a.active, nav a:hover { color: var(--green-700); }
+  .logo-img { height: 50px; width: auto; display: block; }
+  
+  nav { display: flex; gap: 28px; height: 100%; align-items: center; }
+  
+  nav a { 
+    color: var(--text); 
+    font-weight: 500; 
+    font-size: 0.95rem; 
+    position: relative; 
+    display: inline-block;
+    padding: 5px 0;
+    transition: color 0.2s;
+  }
+  
+  nav a:hover { color: var(--brand-green); }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    width: 100%;
+    height: 2px;
+    background-color: var(--brand-green);
+    transition: transform 0.3s ease;
+  }
+
+  nav a.active::after {
+    transform: translateX(-50%) scaleX(1);
+  }
+  
+  nav a.active {
+    color: var(--brand-green);
+    font-weight: 600;
+  }
+
   @media (max-width: 640px) {
     nav { gap: 14px; }
     nav a { font-size: 0.85rem; }
