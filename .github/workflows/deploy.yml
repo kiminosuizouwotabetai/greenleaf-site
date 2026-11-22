@@ -24,7 +24,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Deploy via FTP
+        - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.6
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -32,6 +32,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./dist/
           server-dir: /Greenleaf/public_html/
+          secure: true
           exclude: |
             **/*.mp4
             **/*.webm
