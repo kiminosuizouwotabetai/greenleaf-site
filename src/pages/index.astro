@@ -837,6 +837,12 @@ import Base from '../layouts/Base.astro';
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-top: 4px solid var(--brand-green);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .bonus-scheme:hover {
+    transform: translateY(-4px); 
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
   }
   
   .bonus-scheme h3 {

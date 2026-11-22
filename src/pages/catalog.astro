@@ -1,73 +1,62 @@
 ---
 import Base from '../layouts/Base.astro';
-import ProductCard from '../components/ProductCard.astro';
-import products from '../data/products.json';
-
-const categories = [
-  { key: 'all', name: 'Все' },
-  { key: 'sealuxe', name: 'SEALUXE' },
-  { key: 'carich', name: 'Carich' },
-  { key: 'ilife', name: 'iLiFE' },
-  { key: 'marvisia', name: 'Marvisia' },
-];
 ---
-<Base title="Каталог продукции — Greenleaf">
-  <section>
+<Base title="Каталог — Сервисный центр Greenleaf в Геленджике">
+  <section class="catalog-placeholder">
     <div class="container">
-      <h1>Каталог продукции</h1>
-      <p class="lead">Актуальный ассортимент Greenleaf. Цены и наличие уточняйте при заказе.</p>
-
-      <div class="filters" id="filters">
-        {categories.map(c => (
-          <button class:list={['filter-btn', { active: c.key === 'all' }]} data-category={c.key}>
-            {c.name}
-          </button>
-        ))}
-      </div>
-
-      <div class="grid-products" id="products">
-        {products.map(p => (
-          <div class="product-wrapper" data-category={p.category}>
-            <ProductCard product={p} />
-          </div>
-        ))}
+      <div class="placeholder-content">
+        <h1>Каталог в процессе наполнения</h1>
+        <p class="lead">Совсем скоро здесь появится полный ассортимент продукции Greenleaf с актуальными ценами и подробными описаниями.</p>
+        <p class="sub-text">Следите за обновлениями! А пока вы можете связаться со мной для получения информации о наличии товаров.</p>
+        <a href="/contacts" class="btn">Связаться со мной</a>
       </div>
     </div>
   </section>
-
-  <script>
-    const buttons = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
-    const items = document.querySelectorAll<HTMLElement>('.product-wrapper');
-    buttons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        buttons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const cat = btn.dataset.category;
-        items.forEach(item => {
-          item.style.display = (cat === 'all' || item.dataset.category === cat) ? '' : 'none';
-        });
-      });
-    });
-  </script>
 </Base>
 
 <style>
-  .lead { color: var(--muted); font-size: 1.05rem; margin: 0 0 28px; max-width: 600px; }
-  .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 32px; }
-  .filter-btn { 
-    padding: 8px 18px; 
-    background: var(--bg-card); 
-    border: 1px solid var(--border-color); 
-    color: var(--text); 
-    border-radius: 0;
-    cursor: pointer; 
-    font-size: 0.9rem; 
-    font-weight: 500; 
-    color: var(--text); 
-    transition: all 0.2s; 
-    font-family: inherit; 
+  .catalog-placeholder {
+    padding: 120px 0;
+    background: var(--bg-body);
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
   }
-  .filter-btn:hover { border-color: var(--brand-green); color: var(--brand-green); }
-.filter-btn.active { background: var(--brand-green); border-color: var(--brand-green); color: white;
-  .grid-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+  
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .placeholder-content {
+    background: var(--bg-card);
+    padding: 60px 40px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-top: 4px solid var(--brand-green);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  }
+  
+  h1 {
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+  
+  .lead {
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    margin-bottom: 25px;
+    line-height: 1.6;
+  }
+  
+  .sub-text {
+    font-size: 1rem;
+    color: var(--text-muted);
+    margin-bottom: 40px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 </style>
