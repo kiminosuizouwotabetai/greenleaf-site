@@ -900,7 +900,15 @@ import Base from '../layouts/Base.astro';
   @media (max-width: 768px) {
     .hero { padding: 40px 0; }
     .hero-inner { grid-template-columns: 1fr; gap: 20px; }
-    .hero-visual { display: none; }
+    .hero-visual { 
+      display: flex; 
+      order: -1; 
+      margin-bottom: 10px;
+    }
+    
+    .hero-image-wrapper {
+      max-width: 100%;
+    }
     .hero-text h1 { font-size: 2rem; }
     .hero-text p { font-size: 1rem; }
     
