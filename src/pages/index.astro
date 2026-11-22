@@ -898,10 +898,28 @@ import Base from '../layouts/Base.astro';
   }
 
   @media (max-width: 768px) {
-    .hero-inner { grid-template-columns: 1fr; }
+    .hero { padding: 40px 0; }
+    .hero-inner { grid-template-columns: 1fr; gap: 20px; }
     .hero-visual { display: none; }
-    .hero { padding: 50px 0; }
-    .slider-slide { height: 300px; }
-    .slider-btn { width: 36px; height: 36px; font-size: 1rem; }
+    .hero-text h1 { font-size: 2rem; }
+    .hero-text p { font-size: 1rem; }
+    
+    .video-section, .products-video-section, .company-info, .partnership, .start-sets, .gallery-section {
+      padding: 40px 0;
+    }
+    
+    .video-section h2, .products-video-section h2, .company-info h2, .partnership h2, .start-sets h2, .gallery-section h2 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    .slider-slide { height: 250px; padding: 10px; }
+    .slider-btn { width: 32px; height: 32px; font-size: 1rem; }
+    .slider-controls { gap: 10px; }
+    
+    .scheme-container { height: 250px; }
+    .svg-container { max-width: 100%; }
+    
+    .set-image { height: 200px; }
   }
 </style>
