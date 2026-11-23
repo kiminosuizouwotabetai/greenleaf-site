@@ -107,6 +107,78 @@ const fixSubcategory = (name) => {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+const STOP_WORDS = new Set(['для', 'лица', 'кожи', 'уход', 'серия', 'средство', 'товар']);
+
+const normTokens = (value) => {
+  const words = String(value || '')
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/[^a-zа-я0-9]+/g, ' ')
+    .split(' ')
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+  return new Set(words);
+};
+
+// бренд из начала названия маркетплейса
+const BRAND_WORDS = ['SEALUXE', 'iLiFE', 'ILIFE', 'CARICH', 'NILRICH', 'KARDLI', 'SONPHESKIN', 'GREENLEAF', 'YUE ZHONGGUI', 'MOON FLOWER'];
+const marketBrand = (name) => {
+  const lower = String(name || '').toLowerCase();
+  const hit = BRAND_WORDS.find((b) => lower.startsWith(b.toLowerCase()));
+  return hit ? hit.toLowerCase().replace('ilife', 'ilife') : '';
+};
+
+// лучший товар маркетплейса: сначала по артикулу с картинки, потом по названию
+const findMatch = (product, marketList, marketByArticle) => {
+  const A = normTokens(product.name);
+  if (!A.size) return null;
+
+  const brand = String(product.brand || '').toLowerCase();
+
+  const scoreOf = (m) => {
+    let shared = 0;
+    for (const token of A) if (m.tokens.has(token)) shared += 1;
+    return { shared, score: shared / Math.max(1, Math.min(A.size, m.tokens.size)) };
+  };
+
+  const brandOk = (m) => {
+    const mb = marketBrand(m.name);
+    if (!brand || !mb) return true;
+    return mb === brand;
+  };
+
+  // 1. артикул, вычисленный из картинки партнёрской страницы
+  if (product.article) {
+    const direct = marketByArticle[product.article];
+    if (direct) {
+      const { shared, score } = scoreOf({ tokens: normTokens(direct.name) });
+      if (shared >= 2 && score >= 0.4 && brandOk({ name: direct.name })) {
+        return { ...direct, score: Number(score.toFixed(2)) };
+      }
+    }
+  }
+
+  // 2. поиск по названию, со строгим порогом и проверкой бренда
+  let best = null;
+  let bestScore = 0;
+  let bestShared = 0;
+
+  for (const m of marketList) {
+    if (!brandOk(m)) continue;
+    const { shared, score } = scoreOf(m);
+    if (shared < 2) continue;
+    if (score < 0.75) continue;
+    if (shared < 3 && score < 0.85) continue;
+
+    if (score > bestScore || (score === bestScore && shared > bestShared)) {
+      best = m;
+      bestScore = score;
+      bestShared = shared;
+    }
+  }
+
+  return best ? { ...best, score: Number(bestScore.toFixed(2)) } : null;
+};
+
 async function fetchText(url, tries = 3) {
   for (let i = 0; i < tries; i += 1) {
     try {
@@ -451,49 +523,52 @@ async function main() {
     console.log(`Кеш маркетплейса: ${CACHE}`);
   }
 
-  // ---- отбор ----
+  // ---- отбор: сопоставление по названию ----
+  const marketList = Object.values(market).map((m) => ({ ...m, tokens: normTokens(m.name) }));
+  const marketByArticle = market;
+
   const seen = new Set();
   const selected = [];
-  const rejected = { noArticle: [], notFound: [], notAvailable: [], duplicate: [] };
+  const rejected = { notFound: [], notAvailable: [], duplicate: [] };
+  const matches = new Map();
 
   for (const p of partnerProducts) {
-    if (!p.article) {
-      rejected.noArticle.push(p);
-      continue;
-    }
-    if (seen.has(p.article)) {
-      rejected.duplicate.push(p);
-      continue;
-    }
-    seen.add(p.article);
-
-    const m = market[p.article];
+    const m = findMatch(p, marketList, marketByArticle);
     if (!m) {
       rejected.notFound.push(p);
       continue;
     }
+
+    p.market = m;
+    p.marketArticle = m.article;
+    matches.set(p, m);
+
+    if (seen.has(m.article)) {
+      rejected.duplicate.push(p);
+      continue;
+    }
+    seen.add(m.article);
+
     if (m.stock !== AVAILABLE) {
       rejected.notAvailable.push({ ...p, stock: m.stock });
       continue;
     }
-    selected.push({ ...p, market: m });
+    selected.push(p);
   }
 
   console.log('');
   console.log('=== ОТБОР ===');
   console.log(`  всего на странице: ${partnerProducts.length}`);
-  console.log(`  без артикула: ${rejected.noArticle.length}`);
-  console.log(`  нет в маркетплейсе: ${rejected.notFound.length}`);
+  console.log(`  не найдено в маркетплейсе: ${rejected.notFound.length}`);
   console.log(`  не «у партнёров»: ${rejected.notAvailable.length}`);
-  console.log(`  дубли артикулов: ${rejected.duplicate.length}`);
+  console.log(`  дубли: ${rejected.duplicate.length}`);
   console.log(`  В КАТАЛОГ: ${selected.length}`);
 
   if (DEBUG) {
-    console.log('\nбез артикула:', rejected.noArticle.map((p) => p.name).slice(0, 20));
-    console.log('\nнет в маркетплейсе:', rejected.notFound.map((p) => p.article).slice(0, 30));
+    console.log('\nне найдено (примеры):', rejected.notFound.slice(0, 15).map((p) => p.name.slice(0, 45)));
   }
 
-  // ---- порядок ----
+  // ---- сортировка ----
   const catRank = (c) => {
     const i = CATEGORY_ORDER.indexOf(c);
     return i === -1 ? CATEGORY_ORDER.length : i;
@@ -510,40 +585,42 @@ async function main() {
     return a.name.localeCompare(b.name, 'ru');
   });
 
-  // ---- картинки ----
+  // ---- картинки: имя файла = артикул маркетплейса ----
   console.log('\nКачаю картинки…');
   let downloaded = 0;
   let failed = 0;
   for (const p of selected) {
     try {
-      const file = await downloadImage(p.market.image, p.article);
+      const file = await downloadImage(p.market.image, p.marketArticle);
       p.imageFile = '/images/catalog/' + file;
       downloaded += 1;
       if (downloaded % 25 === 0) console.log(`  ${downloaded}/${selected.length}`);
     } catch (err) {
       p.imageFile = '/logo.svg';
       failed += 1;
-      console.error(`  ! ${p.article}: ${err.message}`);
+      console.error(`  ! ${p.marketArticle}: ${err.message}`);
     }
     await sleep(90);
   }
   console.log(`  скачано: ${downloaded}, ошибок: ${failed}`);
 
-  // ---- Excel (все товары с партнёрской страницы) ----
-  const byArticle = new Map();
-  for (const p of partnerProducts) {
-    if (p.article && !byArticle.has(p.article)) byArticle.set(p.article, p);
-  }
+  // ---- Excel: все товары партнёрской страницы ----
+  const selectedSet = new Set(selected);
 
   const rows = partnerProducts.map((p, i) => {
-    const isDup = p.article && byArticle.get(p.article) !== p;
-    const m = p.article ? market[p.article] : null;
+    const m = p.market || null;
+    const inCatalog = selectedSet.has(p);
+    const file = m && inCatalog ? `/images/catalog/${m.article.replace(/[\\/:*?"<>|]/g, '-')}.webp` : '';
+
     return {
       '№': i + 1,
       'Категория': p.category,
       'Подкатегория': p.subcategory,
-      'Артикул': p.article || '',
+      'Артикул (сайт)': p.article || '',
+      'Артикул маркетплейса': m ? m.article : '',
+      'Совпадение': m ? m.score : '',
       'Название': p.name,
+      'Название на маркетплейсе': m ? m.name : '',
       'Объём': p.volume,
       'Бренд': p.brand,
       'Описание': stripTags(p.description),
@@ -551,26 +628,19 @@ async function main() {
       'Цена партнёра': p.partner ?? '',
       'Купон': p.coupon,
       'Цена маркетплейса': m ? m.price : '',
-      'Наличие': isDup
-        ? 'Дубль артикула'
-        : !p.article
-          ? 'Нет артикула'
-          : !m
-            ? 'Нет в маркетплейсе'
-            : m.stock,
-      'В каталоге': m && m.stock === AVAILABLE && !isDup ? 'да' : 'нет',
+      'Наличие': m ? m.stock : 'Не найден в маркетплейсе',
+      'В каталоге': inCatalog ? 'да' : 'нет',
       'Ссылка на товар': m ? m.url : '',
-      'Файл картинки': p.article && m && m.stock === AVAILABLE && !isDup
-        ? `/images/catalog/${p.article.replace(/[\\/:*?"<>|]/g, '-')}.webp`
-        : '',
+      'Файл картинки': file,
     };
   });
 
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [
-    { wch: 4 }, { wch: 24 }, { wch: 24 }, { wch: 10 }, { wch: 50 }, { wch: 10 },
-    { wch: 12 }, { wch: 80 }, { wch: 8 }, { wch: 9 }, { wch: 12 },
-    { wch: 16 }, { wch: 22 }, { wch: 9 }, { wch: 50 }, { wch: 34 },
+    { wch: 4 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 9 },
+    { wch: 45 }, { wch: 45 }, { wch: 10 }, { wch: 12 }, { wch: 80 },
+    { wch: 9 }, { wch: 10 }, { wch: 12 }, { wch: 16 }, { wch: 22 },
+    { wch: 8 }, { wch: 45 }, { wch: 30 },
   ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Товары');
@@ -593,7 +663,7 @@ async function main() {
   db.transaction((list) => {
     list.forEach((p, i) => {
       insert.run({
-        article: p.article,
+        article: p.marketArticle,
         title: p.name,
         description: p.description,
         short: makeShort(p.description, p.name),
@@ -620,8 +690,19 @@ async function main() {
 
   db.close();
 
+  // ---- чистка картинок, на которые больше нет ссылок ----
+  const used = new Set(selected.map((p) => path.basename(p.imageFile || '')));
+  let removed = 0;
+  for (const file of fs.readdirSync(IMG_DIR)) {
+    if (!used.has(file)) {
+      fs.unlinkSync(path.join(IMG_DIR, file));
+      removed += 1;
+    }
+  }
+
   console.log(`\nВ базе: ${total}`);
   for (const g of groups) console.log(`  ${g.category} / ${g.subcategory}: ${g.n}`);
+  console.log(`\nУдалено неиспользуемых картинок: ${removed}`);
 }
 
 main().catch((err) => {

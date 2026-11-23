@@ -259,7 +259,7 @@ const tagColor = new Map(
         const makeBtn = (label, page, opts = {}) => {
           const b = document.createElement('button');
           b.type = 'button';
-          b.className = 'page-btn' + (opts.active ? ' active' : '');
+          b.className = 'page-btn' + (opts.nav ? ' nav' : '') + (opts.active ? ' active' : '');
           b.textContent = label;
           if (opts.disabled) {
             b.disabled = true;
@@ -274,7 +274,7 @@ const tagColor = new Map(
           return b;
         };
 
-        pagination.appendChild(makeBtn('←', state.page - 1, { disabled: state.page === 1 }));
+        pagination.appendChild(makeBtn('←', state.page - 1, { disabled: state.page === 1, nav: true }));
 
         const nums = [...new Set([1, pages, state.page - 1, state.page, state.page + 1])]
           .filter((n) => n >= 1 && n <= pages)
@@ -292,7 +292,7 @@ const tagColor = new Map(
           prev = n;
         }
 
-        pagination.appendChild(makeBtn('→', state.page + 1, { disabled: state.page === pages }));
+        pagination.appendChild(makeBtn('→', state.page + 1, { disabled: state.page === pages, nav: true }));
       };
 
       const apply = () => {
@@ -781,37 +781,68 @@ const tagColor = new Map(
 
   .modal-meta { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 14px; }
 
-  .pagination {
+  :global(.pagination) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    margin-top: 34px;
+    gap: 8px;
+    margin: 44px auto 0;
+    width: fit-content;
   }
 
-  .page-btn {
-    min-width: 38px;
-    padding: 8px 10px;
+  :global(.page-btn) {
+    min-width: 46px;
+    height: 46px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.98rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
     color: var(--text);
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.18s;
   }
 
-  .page-btn:hover:not(.disabled):not(.active) { border-color: var(--brand-green); color: var(--brand-green); }
-  .page-btn.active { background: var(--brand-green); border-color: var(--brand-green); color: #fff; font-weight: 600; }
-  .page-btn.disabled { opacity: 0.45; cursor: default; }
-  .page-dots { color: var(--text-muted); padding: 0 4px; }
+  :global(.page-btn:hover:not(.disabled):not(.active)) {
+    border-color: var(--brand-green);
+    color: var(--brand-green);
+  }
+
+  :global(.page-btn.active) {
+    background: var(--brand-green);
+    border-color: var(--brand-green);
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(23, 155, 73, 0.28);
+  }
+
+  :global(.page-btn.disabled) { color: var(--border-color); cursor: default; }
+
+  :global(.page-btn.nav) {
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--brand-green);
+    border-color: var(--border-color);
+    background: var(--bg-card);
+  }
+
+  :global(.page-btn.nav:hover:not(.disabled)) { background: var(--brand-green); border-color: var(--brand-green); color: #fff; }
+  :global(.page-btn.nav.disabled) { color: #cfd6d1; border-color: var(--border-color); }
+
+  :global(.page-dots) { color: var(--text-muted); padding: 0 2px; letter-spacing: 2px; }
 
   @media (max-width: 700px) {
-    .page-btn { min-width: 34px; padding: 7px 8px; font-size: 0.85rem; }
+    :global(.pagination) { gap: 6px; margin-top: 30px; }
+    :global(.page-btn) { min-width: 40px; height: 40px; padding: 0 8px; font-size: 0.9rem; }
+    :global(.page-btn.nav) { font-size: 1.1rem; }
   }
 
-  .modal-loading { color: var(--text-muted); font-style: italic; }
+  :global(.modal-loading) { color: var(--text-muted); font-style: italic; }
 
   .search-input {
     width: 100%;

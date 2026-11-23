@@ -38,6 +38,25 @@ export const partners = {
       email: 'natalytoloknova1978@gmail.com',
     },
   },
+
+  'oganyan-arman': {
+    slug: 'oganyan-arman',
+    fullName: 'Оганян Арман Артурович',
+    shortName: 'Арман',
+    role: 'VIP-партнёр',
+    city: 'Геленджик',
+    photo: '/arman.webp',
+    ogImage: '/og/arman.jpg',
+    title: 'Оганян Арман — партнёр Greenleaf в Геленджике',
+    description:
+      'Оганян Арман Артурович — официальный партнёр Greenleaf в Геленджике. Премиальный уход, витамины, товары для дома и одежды. Помощь с выбором и оформлением заказа.',
+    contacts: {
+      max: 'https://max.ru/u/f9LHodD0cOLos6JXOlxe6RoquxcA3Z2PyYvt09eZovw1BJjgQ49r1ZkXCwA',
+      vk: 'https://vk.ru/dtnshsfvrtthng',
+      telegram: 'shizenshi',
+      email: 'armanooganiano@yandex.ru',
+    },
+  },
 };
 
 export const partnerList = Object.values(partners);
