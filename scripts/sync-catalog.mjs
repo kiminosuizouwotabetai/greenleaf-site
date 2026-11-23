@@ -32,11 +32,13 @@ const CACHE = path.join(ROOT, 'data', 'marketplace-cache.json');
 const XLSX_OUT = path.join(ROOT, 'data', 'greenleaf-full.xlsx');
 const DB_PATH = path.join(ROOT, 'data', 'catalog.db');
 const IMG_DIR = path.join(ROOT, 'public', 'images', 'catalog');
+const DESC_CACHE = path.join(ROOT, 'data', 'descriptions-cache.json');
 
 const USE_CACHE = process.argv.includes('--use-cache');
 const DEBUG = process.argv.includes('--debug');
 const DRY = process.argv.includes('--dry');
 const REFRESH_IMAGES = process.argv.includes('--refresh-images');
+const REFRESH_DESC = process.argv.includes('--refresh-desc');
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
@@ -459,6 +461,35 @@ async function downloadImage(url, article) {
   return fileName;
 }
 
+async function fetchMarketDescription(url) {
+  const html = await fetchText(url);
+  const $ = cheerio.load(html);
+
+  const heading = $('h2').filter((_, el) => $(el).text().trim() === 'О товаре').first();
+  if (!heading.length) return '';
+
+  const container = heading.parent().clone();
+  container.find('h2').first().remove();
+
+  const raw = (container.html() || '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '• ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&laquo;/g, '«')
+    .replace(/&raquo;/g, '»')
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&[a-z]+;/g, ' ')
+    .replace(/[ \t]+/g, ' ');
+
+  return textToHtml(raw);
+}
+
 function createSchema(db) {
   db.exec(`
     DROP TABLE IF EXISTS products;
@@ -585,6 +616,49 @@ async function main() {
     return a.name.localeCompare(b.name, 'ru');
   });
 
+  // ---- описания с маркетплейса ----
+  let descCache = {};
+  if (fs.existsSync(DESC_CACHE)) {
+    try {
+      descCache = JSON.parse(fs.readFileSync(DESC_CACHE, 'utf8'));
+    } catch {
+      descCache = {};
+    }
+  }
+
+  console.log('\nТяну описания с маркетплейса…');
+  let fetched = 0;
+  let fromCache = 0;
+  let emptyDesc = 0;
+
+  for (const p of selected) {
+    const key = p.marketArticle;
+    let desc = !REFRESH_DESC ? descCache[key] : '';
+
+    if (desc === undefined || desc === null) desc = '';
+
+    if (!desc) {
+      try {
+        desc = await fetchMarketDescription(p.market.url);
+        fetched += 1;
+        if (!desc) emptyDesc += 1;
+      } catch (err) {
+        desc = '';
+        emptyDesc += 1;
+      }
+      descCache[key] = desc;
+      await sleep(120);
+      if (fetched % 25 === 0) console.log(`  ${fetched}/${selected.length}`);
+    } else {
+      fromCache += 1;
+    }
+
+    p.marketDescription = desc;
+  }
+
+  fs.writeFileSync(DESC_CACHE, JSON.stringify(descCache, null, 1));
+  console.log(`  скачано: ${fetched}, из кеша: ${fromCache}, без описания: ${emptyDesc}`);
+
   // ---- картинки: имя файла = артикул маркетплейса ----
   console.log('\nКачаю картинки…');
   let downloaded = 0;
@@ -623,7 +697,8 @@ async function main() {
       'Название на маркетплейсе': m ? m.name : '',
       'Объём': p.volume,
       'Бренд': p.brand,
-      'Описание': stripTags(p.description),
+      'Описание': stripTags(p.market && p.marketDescription ? p.marketDescription : p.description),
+      'Источник описания': p.market && p.marketDescription ? 'маркетплейс' : p.description ? 'сайт партнёра' : 'нет',
       'Цена клиента': p.client ?? '',
       'Цена партнёра': p.partner ?? '',
       'Купон': p.coupon,
@@ -638,7 +713,7 @@ async function main() {
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [
     { wch: 4 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 9 },
-    { wch: 45 }, { wch: 45 }, { wch: 10 }, { wch: 12 }, { wch: 80 },
+    { wch: 45 }, { wch: 45 }, { wch: 10 }, { wch: 12 }, { wch: 80 }, { wch: 18 },
     { wch: 9 }, { wch: 10 }, { wch: 12 }, { wch: 16 }, { wch: 22 },
     { wch: 8 }, { wch: 45 }, { wch: 30 },
   ];
@@ -665,8 +740,8 @@ async function main() {
       insert.run({
         article: p.marketArticle,
         title: p.name,
-        description: p.description,
-        short: makeShort(p.description, p.name),
+        description: p.marketDescription || p.description,
+        short: makeShort(p.marketDescription || p.description, p.name),
         category: p.category,
         subcategory: p.subcategory,
         images: JSON.stringify([p.imageFile]),
