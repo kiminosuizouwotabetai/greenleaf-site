@@ -11,9 +11,6 @@ const beforeLinks = [
   { href: '/catalog', label: 'Каталог' },
   { href: '/about', label: 'О компании' },
 ];
-const afterLinks = [
-  { href: '/contacts', label: 'Контакты' },
-];
 
 const partnersActive = current === '/partners' || current.startsWith('/partners/');
 const isActive = (href) => current === href || (href !== '/' && current.startsWith(href));
@@ -58,10 +55,6 @@ const isActive = (href) => current === href || (href !== '/' && current.startsWi
           <a href="/partners/" class="partners-all">Все партнёры →</a>
         </div>
       </details>
-
-      {afterLinks.map(l => (
-        <a href={l.href} class:list={[{ active: isActive(l.href) }]}>{l.label}</a>
-      ))}
     </nav>
   </div>
 </header>
