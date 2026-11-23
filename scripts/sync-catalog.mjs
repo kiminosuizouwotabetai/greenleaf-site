@@ -33,6 +33,7 @@ const XLSX_OUT = path.join(ROOT, 'data', 'greenleaf-full.xlsx');
 const DB_PATH = path.join(ROOT, 'data', 'catalog.db');
 const IMG_DIR = path.join(ROOT, 'public', 'images', 'catalog');
 const DESC_CACHE = path.join(ROOT, 'data', 'descriptions-cache.json');
+const LEGACY_XLSX = path.join(ROOT, 'data', 'greenleaf.xlsx');
 
 const USE_CACHE = process.argv.includes('--use-cache');
 const DEBUG = process.argv.includes('--debug');
@@ -90,6 +91,12 @@ const CATEGORY_ORDER = [
   'Товары для дома и быта',
   'Ассортимент',
 ];
+
+// «Артикул SAA069» -> «SAA069»
+const cleanArticle = (raw) =>
+  String(raw || '')
+    .replace(/^\s*артикул\s*:?\s*/i, '')
+    .trim();
 
 const normCase = (s) => {
   const t = String(s || '').replace(/\s+/g, ' ').trim();
@@ -317,11 +324,13 @@ async function parsePartnerPage() {
     }
 
     if (tag === 'h6' && /КЛИЕНТ/.test(text) && /ПАРТНЕР/.test(text)) {
-      const m = text.match(/^(.*?)₽\s*КЛИЕНТ\s*([\d\s]+)₽\s*ПАРТНЕР\s*([\d\s]*)(.*)$/);
-      const name = (m ? m[1] : text).replace(/\s+/g, ' ').trim();
-      const client = m ? Number(m[2].replace(/\s/g, '')) : null;
-      const partner = m && m[3].trim() ? Number(m[3].replace(/\s/g, '')) : null;
-      const tail = m ? m[4].trim() : '';
+      const rub = text.indexOf('₽');
+      const name = (rub > 0 ? text.slice(0, rub) : text).replace(/\s+/g, ' ').trim();
+      const clientMatch = text.match(/КЛИЕНТ\S*\s*([\d\s]+)/i);
+      const partnerMatch = text.match(/ПАРТНЕР\S*\s*([\d\s]*)/i);
+      const client = clientMatch ? Number(clientMatch[1].replace(/\s/g, '')) : null;
+      const partner = partnerMatch && partnerMatch[1].trim() ? Number(partnerMatch[1].replace(/\s/g, '')) : null;
+      const tail = /купон/i.test(text.slice(rub > 0 ? rub : 0)) ? text.slice(rub > 0 ? rub : 0) : '';
 
       const fileName = decodeURIComponent(lastImg.split('/').pop() || '');
       const artMatch = fileName.toUpperCase().match(/([A-Z]{2,4}\d{3,4}[A-Z]?)[-_]/);
@@ -490,6 +499,33 @@ async function fetchMarketDescription(url) {
   return textToHtml(raw);
 }
 
+// товары из исходной ручной таблицы — берём всегда, независимо от статуса
+function readLegacyTable() {
+  if (!fs.existsSync(LEGACY_XLSX)) return [];
+
+  const wb = XLSX.readFile(LEGACY_XLSX);
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: null });
+  const out = [];
+
+  for (const r of rows) {
+    const name = String(r['название'] ?? '').trim();
+    const article = cleanArticle(r['артикул']);
+    const image = String(r['картинка'] ?? '').trim();
+    if (!name || !article || !/^https?:/i.test(image)) continue;
+
+    out.push({
+      name,
+      article,
+      description: String(r['описание'] ?? ''),
+      image,
+      category: String(r['категория'] ?? ''),
+      subcategory: String(r['подкатегория'] ?? ''),
+    });
+  }
+
+  return out;
+}
+
 function createSchema(db) {
   db.exec(`
     DROP TABLE IF EXISTS products;
@@ -616,6 +652,52 @@ async function main() {
     return a.name.localeCompare(b.name, 'ru');
   });
 
+  // ---- товары из исходной таблицы ----
+  const legacyItems = readLegacyTable();
+  const usedArticles = new Set(selected.map((p) => p.marketArticle));
+  const selectedNames = selected.map((p) => normTokens(p.name));
+
+  let addedLegacy = 0;
+  for (const item of legacyItems) {
+    if (usedArticles.has(item.article)) continue;
+
+    const tokens = normTokens(item.name);
+    const clashes = selectedNames.some((set) => {
+      let shared = 0;
+      for (const t of tokens) if (set.has(t)) shared += 1;
+      return shared >= 3 && shared / Math.min(tokens.size, set.size) >= 0.8;
+    });
+    if (clashes) continue;
+
+    selected.push({
+      name: item.name,
+      article: item.article,
+      category: fixCategory(item.category),
+      subcategory: fixSubcategory(item.subcategory),
+      volume: '',
+      brand: '',
+      client: null,
+      partner: null,
+      coupon: '',
+      description: textToHtml(item.description),
+      marketDescription: '',
+      marketArticle: item.article,
+      legacy: true,
+      market: {
+        article: item.article,
+        name: item.name,
+        url: '',
+        price: '',
+        stock: 'legacy',
+        image: item.image,
+      },
+    });
+    usedArticles.add(item.article);
+    addedLegacy += 1;
+  }
+
+  console.log(`  добавлено из исходной таблицы: ${addedLegacy}`);
+
   // ---- описания с маркетплейса ----
   let descCache = {};
   if (fs.existsSync(DESC_CACHE)) {
@@ -632,6 +714,11 @@ async function main() {
   let emptyDesc = 0;
 
   for (const p of selected) {
+    if (!p.market.url) {
+      p.marketDescription = '';
+      continue;
+    }
+
     const key = p.marketArticle;
     let desc = !REFRESH_DESC ? descCache[key] : '';
 
