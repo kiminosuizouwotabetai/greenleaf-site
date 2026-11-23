@@ -104,6 +104,8 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
             ))}
           </div>
 
+          <nav class="pagination" id="pagination" aria-label="Страницы каталога" hidden></nav>
+
           <p class="empty-state" id="emptyState" hidden>По этим фильтрам ничего не нашлось. Попробуйте сбросить.</p>
         </div>
       </div>
@@ -122,6 +124,7 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
         </div>
         <div class="modal-text">
           <h2 id="modalTitle"></h2>
+          <p id="modalMeta" class="modal-meta"></p>
           <div id="modalDesc" class="modal-desc"></div>
         </div>
       </div>
@@ -141,13 +144,17 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
       const sidebar = document.getElementById('catalogSidebar');
       const filtersToggle = document.getElementById('filtersToggle');
       const filtersCount = document.getElementById('filtersCount');
+      const pagination = document.getElementById('pagination');
 
       filtersToggle.addEventListener('click', () => {
         const open = sidebar.classList.toggle('open');
         filtersToggle.setAttribute('aria-expanded', String(open));
       });
 
-      const state = { cat: 'Все', sub: 'Все', sort: 'default' };
+      const state = { cat: 'Все', sub: 'Все', sort: 'default', page: 1 };
+      const PER_PAGE = 24;
+
+      const ordered = () => Array.from(grid.querySelectorAll('.product-card'));
 
       const plural = (n, one, few, many) => {
         const a = Math.abs(n) % 100;
@@ -158,19 +165,69 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
         return many;
       };
 
+      const matches = (card) =>
+        (state.cat === 'Все' || card.dataset.category === state.cat) &&
+        (state.sub === 'Все' || card.dataset.subcategory === state.sub);
+
+      const renderPagination = (pages) => {
+        pagination.innerHTML = '';
+        pagination.hidden = pages <= 1;
+        if (pages <= 1) return;
+
+        const makeBtn = (label, page, opts = {}) => {
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'page-btn' + (opts.active ? ' active' : '');
+          b.textContent = label;
+          if (opts.disabled) {
+            b.disabled = true;
+            b.classList.add('disabled');
+          } else {
+            b.addEventListener('click', () => {
+              state.page = page;
+              apply();
+              grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+          }
+          return b;
+        };
+
+        pagination.appendChild(makeBtn('←', state.page - 1, { disabled: state.page === 1 }));
+
+        const nums = [...new Set([1, pages, state.page - 1, state.page, state.page + 1])]
+          .filter((n) => n >= 1 && n <= pages)
+          .sort((a, b) => a - b);
+
+        let prev = 0;
+        for (const n of nums) {
+          if (n - prev > 1) {
+            const dots = document.createElement('span');
+            dots.className = 'page-dots';
+            dots.textContent = '…';
+            pagination.appendChild(dots);
+          }
+          pagination.appendChild(makeBtn(String(n), n, { active: n === state.page }));
+          prev = n;
+        }
+
+        pagination.appendChild(makeBtn('→', state.page + 1, { disabled: state.page === pages }));
+      };
+
       const apply = () => {
-        let visible = 0;
+        const list = ordered().filter(matches);
+        const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+        if (state.page > pages) state.page = pages;
+
+        const start = (state.page - 1) * PER_PAGE;
+        const onPage = new Set(list.slice(start, start + PER_PAGE));
 
         cards.forEach((card) => {
-          const catOk = state.cat === 'Все' || card.dataset.category === state.cat;
-          const subOk = state.sub === 'Все' || card.dataset.subcategory === state.sub;
-          const show = catOk && subOk;
-          card.hidden = !show;
-          if (show) visible += 1;
+          card.hidden = !onPage.has(card);
         });
 
-        countEl.textContent = `${visible} ${plural(visible, 'товар', 'товара', 'товаров')}`;
-        emptyEl.hidden = visible !== 0;
+        countEl.textContent = `${list.length} ${plural(list.length, 'товар', 'товара', 'товаров')}`;
+        emptyEl.hidden = list.length !== 0;
+        renderPagination(pages);
 
         const activeFilters = (state.cat !== 'Все' ? 1 : 0) + (state.sub !== 'Все' ? 1 : 0);
         filtersCount.textContent = String(activeFilters);
@@ -199,6 +256,7 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
             btns.forEach((b) => b.classList.remove('active'));
             btn.classList.add('active');
             state[key] = btn.dataset.value;
+            state.page = 1;
             apply();
           });
         });
@@ -215,13 +273,16 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
         [catBtns, subcatBtns].forEach((btns) => {
           btns.forEach((b, i) => b.classList.toggle('active', i === 0));
         });
+        state.page = 1;
         sortCards();
         apply();
       });
 
       sortSelect.addEventListener('change', () => {
         state.sort = sortSelect.value;
+        state.page = 1;
         sortCards();
+        apply();
       });
 
       // исходный порядок для сортировки «как в каталоге»
@@ -236,6 +297,7 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
       const modalTitle = document.getElementById('modalTitle');
       const modalDesc = document.getElementById('modalDesc');
       const modalCategory = document.getElementById('modalCategory');
+      const modalMeta = document.getElementById('modalMeta');
 
       document.querySelectorAll('.details-btn').forEach((btn) => {
         btn.addEventListener('click', (e) => {
@@ -248,6 +310,7 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
           modalTitle.textContent = product.title;
           modalDesc.innerHTML = product.description;
           modalCategory.textContent = product.subcategory;
+          modalMeta.textContent = [product.volume, product.brand].filter(Boolean).join(' · ');
           modal.classList.add('active');
           document.body.style.overflow = 'hidden';
         });
@@ -566,5 +629,37 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
     .modal-image { padding: 10px; }
     .modal-image img { max-height: 42vh; }
     .modal-text h2 { font-size: 1.15rem; }
+  }
+
+  .modal-meta { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 14px; }
+
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 34px;
+  }
+
+  .page-btn {
+    min-width: 38px;
+    padding: 8px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+
+  .page-btn:hover:not(.disabled):not(.active) { border-color: var(--brand-green); color: var(--brand-green); }
+  .page-btn.active { background: var(--brand-green); border-color: var(--brand-green); color: #fff; font-weight: 600; }
+  .page-btn.disabled { opacity: 0.45; cursor: default; }
+  .page-dots { color: var(--text-muted); padding: 0 4px; }
+
+  @media (max-width: 700px) {
+    .page-btn { min-width: 34px; padding: 7px 8px; font-size: 0.85rem; }
   }
 </style>
