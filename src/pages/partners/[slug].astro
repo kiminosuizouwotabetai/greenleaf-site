@@ -1,0 +1,14 @@
+---
+import PartnerHome from '../../components/PartnerHome.astro';
+import { partnerList } from '../../data/partners.js';
+
+export function getStaticPaths() {
+  return partnerList.map((partner) => ({
+    params: { slug: partner.slug },
+    props: { partner },
+  }));
+}
+
+const { partner } = Astro.props;
+---
+<PartnerHome partner={partner} />

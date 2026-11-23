@@ -6,13 +6,19 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "deploy": "npm run build && node deploy.js"
+    "deploy": "npm run build && node deploy.js",
+    "import:catalog": "node scripts/import-catalog.mjs"
   },
   "dependencies": {
-    "astro": "^5.0.0"
+    "astro": "^5.0.0",
+    "better-sqlite3": "^13.2.0",
+    "sharp": "^0.35.5",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "basic-ftp": "^6.2.6",
     "ftp-deploy": "^2.4.7"
   }
 }
+

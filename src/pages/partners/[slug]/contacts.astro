@@ -1,0 +1,21 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ContactsSection from '../../../components/ContactsSection.astro';
+import { partnerList } from '../../../data/partners.js';
+
+export function getStaticPaths() {
+  return partnerList.map((partner) => ({
+    params: { slug: partner.slug },
+    props: { partner },
+  }));
+}
+
+const { partner } = Astro.props;
+---
+<Base
+  title={`Контакты — ${partner.fullName}, Greenleaf в Геленджике`}
+  description={`Связаться с ${partner.fullName} — ${partner.role} Greenleaf в Геленджике: телефоны, MAX, Telegram.`}
+  partner={partner}
+>
+  <ContactsSection partner={partner} />
+</Base>

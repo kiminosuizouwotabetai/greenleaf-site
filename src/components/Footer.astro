@@ -1,9 +1,12 @@
 ---
+import { defaultPartner } from '../data/partners.js';
+
 const year = new Date().getFullYear();
+const { partner = defaultPartner } = Astro.props;
 ---
 <footer class="site-footer">
   <div class="container">
-    <p>© {year} Наталия Толокнова, г. Геленджик</p>
+    <p>© {year} {partner.fullName}, г. {partner.city}</p>
     <p class="muted">Сайт носит информационный характер. Является личной страницей официального партнёра Greenleaf.</p>
   </div>
 </footer>

@@ -4,3 +4,7 @@ dist/
 .DS_Store
 public/*.mp4
 deploy.js
+
+# local sources and backups
+_source/
+_backup-*/

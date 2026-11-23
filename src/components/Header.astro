@@ -1,15 +1,22 @@
 ---
+import { partnerList } from '../data/partners.js';
+
 let current = Astro.url.pathname;
 if (current !== '/' && current.endsWith('/')) {
   current = current.slice(0, -1);
 }
 
-const links = [
+const beforeLinks = [
   { href: '/', label: 'Главная' },
   { href: '/catalog', label: 'Каталог' },
   { href: '/about', label: 'О компании' },
+];
+const afterLinks = [
   { href: '/contacts', label: 'Контакты' },
 ];
+
+const partnersActive = current === '/partners' || current.startsWith('/partners/');
+const isActive = (href) => current === href || (href !== '/' && current.startsWith(href));
 ---
 <header class="site-header">
   <div class="container header-inner">
@@ -23,17 +30,49 @@ const links = [
     </label>
 
     <nav class="main-nav">
-      {links.map(l => {
-        const isActive = current === l.href || (l.href !== '/' && current.startsWith(l.href));
-        return (
-          <a href={l.href} class:list={[{ active: isActive }]}>
-            {l.label}
-          </a>
-        );
-      })}
+      {beforeLinks.map(l => (
+        <a href={l.href} class:list={[{ active: isActive(l.href) }]}>{l.label}</a>
+      ))}
+
+      <details class="nav-partners" class:list={[{ active: partnersActive }]}>
+        <summary>
+          <span>Партнёры</span>
+          <svg class="chev" viewBox="0 0 12 8" width="10" height="7" aria-hidden="true">
+            <path d="M1 1.5L6 6.5L11 1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </summary>
+        <div class="partners-menu">
+          {partnerList.map(p => (
+            <a
+              href={`/partners/${p.slug}/`}
+              class="partner-item"
+              class:list={[{ active: current === `/partners/${p.slug}` }]}
+            >
+              <img src={p.photo} alt="" class="partner-avatar" loading="lazy" />
+              <span class="partner-meta">
+                <span class="partner-name">{p.fullName}</span>
+                <span class="partner-role">{p.role}</span>
+              </span>
+            </a>
+          ))}
+          <a href="/partners/" class="partners-all">Все партнёры →</a>
+        </div>
+      </details>
+
+      {afterLinks.map(l => (
+        <a href={l.href} class:list={[{ active: isActive(l.href) }]}>{l.label}</a>
+      ))}
     </nav>
   </div>
 </header>
+
+<script>
+  document.addEventListener('click', (event) => {
+    document.querySelectorAll('details.nav-partners[open]').forEach((details) => {
+      if (!details.contains(event.target)) details.removeAttribute('open');
+    });
+  });
+</script>
 
 <style is:global>
   .site-header { background: white; border-bottom: 1px solid #e8e8e0; position: sticky; top: 0; z-index: 100; }
@@ -63,7 +102,49 @@ const links = [
   .main-nav a.active::after { transform: translateX(-50%) scaleX(1); }
   .main-nav a.active { color: var(--brand-green); font-weight: 600; }
 
-    @media (max-width: 768px) {
+  /* --- выпадающее меню «Партнёры» --- */
+  .nav-partners { position: relative; height: 100%; display: flex; align-items: center; }
+  .nav-partners > summary {
+    list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px;
+    padding: 5px 0; font-weight: 500; font-size: 0.95rem; color: var(--text);
+    transition: color 0.2s; user-select: none;
+  }
+  .nav-partners > summary::-webkit-details-marker { display: none; }
+  .nav-partners > summary:hover,
+  .nav-partners[open] > summary,
+  .nav-partners.active > summary { color: var(--brand-green); }
+  .nav-partners[open] > summary .chev { transform: rotate(180deg); }
+  .nav-partners .chev { transition: transform 0.2s; }
+
+  .partners-menu {
+    position: absolute; top: calc(100% + 1px); left: 50%; transform: translateX(-50%);
+    background: #fff; border: 1px solid var(--border-color);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
+    min-width: 330px; padding: 8px; z-index: 200;
+  }
+
+  .main-nav .partners-menu a {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px; font-size: 0.95rem; color: var(--text); font-weight: 500;
+  }
+  .main-nav .partners-menu a::after { display: none; }
+  .main-nav .partners-menu a:hover,
+  .main-nav .partners-menu a.active { background: var(--brand-green-light); color: var(--brand-green-dark); }
+
+  .partner-avatar {
+    width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+    flex-shrink: 0; border: 2px solid var(--brand-green-light); background: #fff;
+  }
+  .partner-meta { display: flex; flex-direction: column; line-height: 1.25; }
+  .partner-name { font-weight: 600; }
+  .partner-role { font-size: 0.8rem; color: var(--text-muted); font-weight: 400; }
+
+  .main-nav .partners-menu .partners-all {
+    justify-content: center; color: var(--brand-green); font-weight: 600;
+    border-top: 1px solid var(--border-color); margin-top: 6px; padding-top: 12px;
+  }
+
+  @media (max-width: 768px) {
     .menu-button { display: flex; }
     
     .main-nav {
@@ -96,6 +177,22 @@ const links = [
       background: var(--brand-green-light); 
       color: var(--brand-green-dark); 
       border-left: 4px solid var(--brand-green); 
+    }
+
+    .nav-partners { display: block; height: auto; }
+    .nav-partners > summary {
+      padding: 20px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); background: #fff;
+    }
+    .partners-menu {
+      position: static; transform: none; box-shadow: none; border: 0;
+      min-width: 0; padding: 0; background: #f7fbf8;
+    }
+    .main-nav .partners-menu a {
+      padding: 16px 20px 16px 28px; font-size: 1rem; border-bottom: 1px solid var(--border-color);
+      background: transparent;
+    }
+    .main-nav .partners-menu .partners-all {
+      padding: 16px 20px; margin-top: 0; border-top: 0; justify-content: flex-start;
     }
 
     .menu-toggle:checked ~ .main-nav { 

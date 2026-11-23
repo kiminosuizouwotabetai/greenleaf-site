@@ -1,62 +1,570 @@
 ---
 import Base from '../layouts/Base.astro';
+import Database from 'better-sqlite3';
+import path from 'path';
+
+const db = new Database(path.join(process.cwd(), 'data', 'catalog.db'), { readonly: true });
+const allProducts = db.prepare('SELECT * FROM products ORDER BY sort_order, id').all();
+
+const products = allProducts.map((p) => ({
+  ...p,
+  images: JSON.parse(p.images),
+}));
+
+const categories = ['Все', ...new Set(products.map((p) => p.category))];
+const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))];
 ---
-<Base title="Каталог — Сервисный центр Greenleaf в Геленджике">
-  <section class="catalog-placeholder">
+<Base
+  title="Каталог продукции — Greenleaf в Геленджике"
+  description="Каталог продукции Greenleaf: уход за кожей лица, основной и комплексный уход, маски. Оформление заказа через партнёра в Геленджике."
+>
+  <section class="catalog-section">
     <div class="container">
-      <div class="placeholder-content">
-        <h1>Каталог в процессе наполнения</h1>
-        <p class="lead">Совсем скоро здесь появится полный ассортимент продукции Greenleaf с актуальными ценами и подробными описаниями.</p>
-        <p class="sub-text">Следите за обновлениями! А пока вы можете связаться со мной для получения информации о наличии товаров.</p>
-        <a href="/contacts" class="btn">Связаться со мной</a>
+      <h1>Каталог продукции</h1>
+      <p class="lead">Ознакомьтесь с ассортиментом. Для заказа свяжитесь со мной.</p>
+
+      <div class="catalog-layout">
+        <aside class="catalog-sidebar" id="catalogSidebar">
+          <button type="button" class="filters-toggle" id="filtersToggle" aria-expanded="false" aria-controls="filtersBody">
+            <span class="filters-toggle-label">Фильтры</span>
+            <span class="filters-toggle-count" id="filtersCount" hidden></span>
+            <svg class="filters-toggle-chevron" viewBox="0 0 12 8" width="12" height="8" aria-hidden="true">
+              <path d="M1 1.5L6 6.5L11 1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <div class="filters-body" id="filtersBody">
+            <div class="filter-block">
+            <h2 class="filter-title">Категория</h2>
+            <div class="filters" id="catFilters">
+              {categories.map((c) => (
+                <button
+                  type="button"
+                  class="filter-btn"
+                  class:list={[{ active: c === 'Все' }]}
+                  data-type="category"
+                  data-value={c}
+                >{c}</button>
+              ))}
+            </div>
+          </div>
+
+          <div class="filter-block">
+            <h2 class="filter-title">Подкатегория</h2>
+            <div class="filters" id="subcatFilters">
+              {subcategories.map((c) => (
+                <button
+                  type="button"
+                  class="filter-btn"
+                  class:list={[{ active: c === 'Все' }]}
+                  data-type="subcategory"
+                  data-value={c}
+                >{c}</button>
+              ))}
+            </div>
+          </div>
+
+          <button type="button" class="filter-reset" id="resetFilters">Сбросить фильтры</button>
+          </div>
+        </aside>
+
+        <div class="catalog-main">
+          <div class="catalog-toolbar">
+            <span class="catalog-count" id="catalogCount">{products.length} товаров</span>
+            <label class="sort-label">
+              <span>Сортировка:</span>
+              <select id="sortSelect">
+                <option value="default">как в каталоге</option>
+                <option value="name-asc">название А–Я</option>
+                <option value="name-desc">название Я–А</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid-products" id="productsGrid">
+            {products.map((p) => (
+              <article
+                class="product-card"
+                data-category={p.category}
+                data-subcategory={p.subcategory}
+                data-title={p.title}
+              >
+                <div class="product-image">
+                  <img src={p.images[0] || '/logo.svg'} alt={p.title} loading="lazy" onerror="this.src='/logo.svg'" />
+                </div>
+                <div class="product-info">
+                  <span class="category-tag">{p.subcategory}</span>
+                  <h3>{p.title}</h3>
+                  {p.short && <p class="short">{p.short}</p>}
+                  <div class="product-footer">
+                    <button type="button" class="btn btn-outline details-btn" data-id={p.id}>Подробнее</button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <p class="empty-state" id="emptyState" hidden>По этим фильтрам ничего не нашлось. Попробуйте сбросить.</p>
+        </div>
       </div>
     </div>
   </section>
+
+  <div class="modal-overlay" id="productModal">
+    <div class="modal-content product-modal">
+      <div class="modal-head">
+        <span id="modalCategory" class="category-tag"></span>
+        <button type="button" class="modal-close" id="closeModal" aria-label="Закрыть">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-image">
+          <img id="modalImg" src="" alt="" />
+        </div>
+        <div class="modal-text">
+          <h2 id="modalTitle"></h2>
+          <div id="modalDesc" class="modal-desc"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script define:vars={{ products }}>
+    document.addEventListener('DOMContentLoaded', () => {
+      const grid = document.getElementById('productsGrid');
+      const cards = Array.from(grid.querySelectorAll('.product-card'));
+      const catBtns = Array.from(document.querySelectorAll('#catFilters .filter-btn'));
+      const subcatBtns = Array.from(document.querySelectorAll('#subcatFilters .filter-btn'));
+      const resetBtn = document.getElementById('resetFilters');
+      const sortSelect = document.getElementById('sortSelect');
+      const countEl = document.getElementById('catalogCount');
+      const emptyEl = document.getElementById('emptyState');
+      const sidebar = document.getElementById('catalogSidebar');
+      const filtersToggle = document.getElementById('filtersToggle');
+      const filtersCount = document.getElementById('filtersCount');
+
+      filtersToggle.addEventListener('click', () => {
+        const open = sidebar.classList.toggle('open');
+        filtersToggle.setAttribute('aria-expanded', String(open));
+      });
+
+      const state = { cat: 'Все', sub: 'Все', sort: 'default' };
+
+      const plural = (n, one, few, many) => {
+        const a = Math.abs(n) % 100;
+        const b = a % 10;
+        if (a > 10 && a < 20) return many;
+        if (b === 1) return one;
+        if (b >= 2 && b <= 4) return few;
+        return many;
+      };
+
+      const apply = () => {
+        let visible = 0;
+
+        cards.forEach((card) => {
+          const catOk = state.cat === 'Все' || card.dataset.category === state.cat;
+          const subOk = state.sub === 'Все' || card.dataset.subcategory === state.sub;
+          const show = catOk && subOk;
+          card.hidden = !show;
+          if (show) visible += 1;
+        });
+
+        countEl.textContent = `${visible} ${plural(visible, 'товар', 'товара', 'товаров')}`;
+        emptyEl.hidden = visible !== 0;
+
+        const activeFilters = (state.cat !== 'Все' ? 1 : 0) + (state.sub !== 'Все' ? 1 : 0);
+        filtersCount.textContent = String(activeFilters);
+        filtersCount.hidden = activeFilters === 0;
+      };
+
+      const sortCards = () => {
+        if (state.sort === 'default') {
+          cards
+            .slice()
+            .sort((a, b) => Number(a.dataset.order) - Number(b.dataset.order))
+            .forEach((card) => grid.appendChild(card));
+          return;
+        }
+
+        const dir = state.sort === 'name-asc' ? 1 : -1;
+        cards
+          .slice()
+          .sort((a, b) => dir * a.dataset.title.localeCompare(b.dataset.title, 'ru'))
+          .forEach((card) => grid.appendChild(card));
+      };
+
+      const bindFilter = (btns, key) => {
+        btns.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            btns.forEach((b) => b.classList.remove('active'));
+            btn.classList.add('active');
+            state[key] = btn.dataset.value;
+            apply();
+          });
+        });
+      };
+
+      bindFilter(catBtns, 'cat');
+      bindFilter(subcatBtns, 'sub');
+
+      resetBtn.addEventListener('click', () => {
+        state.cat = 'Все';
+        state.sub = 'Все';
+        state.sort = 'default';
+        sortSelect.value = 'default';
+        [catBtns, subcatBtns].forEach((btns) => {
+          btns.forEach((b, i) => b.classList.toggle('active', i === 0));
+        });
+        sortCards();
+        apply();
+      });
+
+      sortSelect.addEventListener('change', () => {
+        state.sort = sortSelect.value;
+        sortCards();
+      });
+
+      // исходный порядок для сортировки «как в каталоге»
+      cards.forEach((card, i) => {
+        card.dataset.order = String(i);
+      });
+
+      // ---- попап ----
+      const modal = document.getElementById('productModal');
+      const closeBtn = document.getElementById('closeModal');
+      const modalImg = document.getElementById('modalImg');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalDesc = document.getElementById('modalDesc');
+      const modalCategory = document.getElementById('modalCategory');
+
+      document.querySelectorAll('.details-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          const id = parseInt(e.currentTarget.dataset.id, 10);
+          const product = products.find((p) => p.id === id);
+          if (!product) return;
+
+          modalImg.src = product.images[0] || '/logo.svg';
+          modalImg.onerror = function () { this.src = '/logo.svg'; };
+          modalTitle.textContent = product.title;
+          modalDesc.innerHTML = product.description;
+          modalCategory.textContent = product.subcategory;
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        });
+      });
+
+      const close = () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      };
+
+      closeBtn.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) close();
+      });
+
+      apply();
+    });
+  </script>
 </Base>
 
 <style>
-  .catalog-placeholder {
-    padding: 120px 0;
-    background: var(--bg-body);
-    min-height: 70vh;
+  .catalog-section { padding: 50px 0 80px; background: var(--bg-body); min-height: 80vh; }
+  h1 { text-align: center; margin-bottom: 10px; }
+  .lead { text-align: center; color: var(--text-muted); margin-bottom: 36px; }
+
+  .catalog-layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* ---------- сайдбар ---------- */
+  .catalog-sidebar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 18px 16px 20px;
+    position: sticky;
+    top: 92px;
+  }
+
+  .filters-toggle { display: none; }
+  .filters-body { display: block; }
+
+  .filter-block + .filter-block { margin-top: 22px; }
+
+  .filter-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+    font-weight: 700;
+  }
+
+  .filters { display: flex; flex-direction: column; gap: 2px; }
+
+  .filter-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    background: transparent;
+    border: 0;
+    border-left: 3px solid transparent;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+  }
+
+  .filter-btn:hover { background: #f4f7f5; color: var(--brand-green-dark); }
+
+  .filter-btn.active {
+    background: var(--brand-green-light);
+    color: var(--brand-green-dark);
+    border-left-color: var(--brand-green);
+    font-weight: 600;
+  }
+
+  .filter-reset {
+    margin-top: 22px;
+    width: 100%;
+    padding: 9px 12px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+
+  .filter-reset:hover { border-color: var(--brand-green); color: var(--brand-green); }
+
+  /* ---------- тулбар ---------- */
+  .catalog-toolbar {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
   }
-  
-  .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 0 20px;
-  }
-  
-  .placeholder-content {
-    background: var(--bg-card);
-    padding: 60px 40px;
-    text-align: center;
+
+  .catalog-count { color: var(--text-muted); font-size: 0.9rem; }
+
+  .sort-label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-muted); }
+
+  .sort-label select {
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 6px 10px;
     border: 1px solid var(--border-color);
-    border-top: 4px solid var(--brand-green);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  }
-  
-  h1 {
-    font-size: 2.2rem;
-    margin-bottom: 20px;
+    background: var(--bg-card);
     color: var(--text);
+    cursor: pointer;
   }
-  
-  .lead {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    margin-bottom: 25px;
-    line-height: 1.6;
+
+  /* ---------- сетка ---------- */
+  .grid-products {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
   }
-  
-  .sub-text {
-    font-size: 1rem;
+
+  .product-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .product-card[hidden] { display: none; }
+
+  .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); border-color: var(--brand-green); }
+
+  .product-image {
+    width: 100%;
+    height: 180px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .product-image img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  .product-info { padding: 14px; display: flex; flex-direction: column; flex-grow: 1; }
+
+  .category-tag {
+    display: inline-block;
+    background: var(--brand-green-light);
+    color: var(--brand-green-dark);
+    padding: 3px 8px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+    align-self: flex-start;
+  }
+
+  .product-info h3 { margin: 0 0 8px 0; font-size: 0.92rem; line-height: 1.35; }
+
+  .short { color: var(--text-muted); font-size: 0.82rem; line-height: 1.45; margin: 0 0 14px 0; flex-grow: 1; }
+
+  .product-footer { display: flex; align-items: center; justify-content: flex-end; margin-top: auto; }
+  .product-footer .btn { padding: 7px 12px; font-size: 0.8rem; }
+
+  .empty-state { color: var(--text-muted); padding: 40px 0; text-align: center; }
+
+  /* ---------- попап ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; z-index: 1000; opacity: 0; visibility: hidden; transition: 0.25s;
+  }
+  .modal-overlay.active { opacity: 1; visibility: visible; }
+
+  .modal-content {
+    background: var(--bg-card);
+    width: 100%;
+    max-width: 860px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    border-top: 4px solid var(--brand-green);
+  }
+
+  .modal-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modal-head .category-tag { margin-bottom: 0; }
+
+  .modal-close {
+    background: none;
+    border: 0;
+    font-size: 1.9rem;
+    line-height: 1;
+    padding: 0 4px;
+    cursor: pointer;
     color: var(--text-muted);
-    margin-bottom: 40px;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+  }
+  .modal-close:hover { color: var(--brand-green); }
+
+  .modal-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    padding: 22px;
+  }
+
+  .modal-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    padding: 14px;
+    min-height: 0;
+  }
+
+  .modal-image img { max-width: 100%; max-height: 380px; object-fit: contain; display: block; }
+
+  .modal-text h2 { font-size: 1.3rem; margin: 0 0 14px; }
+
+  .modal-desc p { margin-bottom: 12px; line-height: 1.6; color: var(--text-muted); }
+  .modal-desc ul, .modal-desc ol { margin-bottom: 12px; padding-left: 20px; color: var(--text-muted); }
+  .modal-desc li { margin-bottom: 5px; }
+  .modal-desc strong { color: var(--text); }
+
+  /* ---------- адаптив ---------- */
+  @media (max-width: 1180px) {
+    .grid-products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 900px) {
+    .catalog-layout { grid-template-columns: 1fr; gap: 20px; }
+    .catalog-sidebar { position: static; padding: 0; }
+    .filters-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 16px;
+      background: none;
+      border: 0;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+    }
+    .filters-toggle-chevron { margin-left: auto; color: var(--brand-green); transition: transform 0.2s; }
+    .filters-toggle[aria-expanded="true"] .filters-toggle-chevron { transform: rotate(180deg); }
+    .filters-toggle-count {
+      background: var(--brand-green);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 10px;
+    }
+    .filters-body { display: none; padding: 0 14px 16px; border-top: 1px solid var(--border-color); }
+    .catalog-sidebar.open .filters-body { display: block; }
+    .filters { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .filter-btn {
+      width: auto;
+      border-left: 0;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      padding: 7px 12px;
+      font-size: 0.85rem;
+    }
+    .filter-btn.active { border-color: var(--brand-green); }
+    .filter-reset { margin-top: 14px; width: auto; padding: 7px 14px; }
+    .filter-block + .filter-block { margin-top: 14px; }
+    .filter-block:first-child { margin-top: 14px; }
+  }
+
+  @media (max-width: 700px) {
+    .grid-products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .product-image { height: 150px; padding: 10px; }
+    .product-info { padding: 10px; }
+    .product-info h3 { font-size: 0.85rem; }
+    .short { display: none; }
+    .catalog-section { padding: 32px 0 60px; }
+  }
+
+  @media (max-width: 768px) {
+    .modal-overlay { padding: 0; align-items: flex-start; }
+    .modal-content { max-height: 100vh; min-height: 100vh; max-width: 100%; }
+    .modal-body { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+    .modal-image { padding: 10px; }
+    .modal-image img { max-height: 42vh; }
+    .modal-text h2 { font-size: 1.15rem; }
   }
 </style>

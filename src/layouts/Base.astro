@@ -1,7 +1,20 @@
 ---
-const { title = 'Сервисный центр Greenleaf в Геленджике | Официальный партнёр' } = Astro.props;
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { defaultPartner } from '../data/partners.js';
+
+const {
+  title = 'Greenleaf в Геленджике | Официальный партнёр',
+  description = 'Официальные партнёры Greenleaf в Геленджике. Премиальный уход, витамины, товары для дома и одежды. Помощь с выбором и оформлением заказа.',
+  partner = defaultPartner,
+  image = partner.ogImage || partner.photo,
+} = Astro.props;
+
+const canonical = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : Astro.url.pathname;
+
+const ogImage = Astro.site ? new URL(image, Astro.site).href : image;
 ---
 <!doctype html>
 <html lang="ru">
@@ -9,13 +22,29 @@ import Footer from '../components/Footer.astro';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="/favicon.png" />
-  <meta name="description" content="Сервисный центр Greenleaf в Геленджике. Премиальный уход, витамины, товары для дома и одежды. Помощь с выбором и оформлением заказа." />
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Greenleaf в Геленджике" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:image:alt" content={title} />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={ogImage} />
+
   <title>{title}</title>
 </head>
 <body>
   <Header />
   <main><slot /></main>
-  <Footer />
+  <Footer partner={partner} />
 </body>
 </html>
 
