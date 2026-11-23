@@ -36,6 +36,7 @@ const IMG_DIR = path.join(ROOT, 'public', 'images', 'catalog');
 const USE_CACHE = process.argv.includes('--use-cache');
 const DEBUG = process.argv.includes('--debug');
 const DRY = process.argv.includes('--dry');
+const REFRESH_IMAGES = process.argv.includes('--refresh-images');
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
@@ -150,16 +151,17 @@ function splitMeta(text) {
   const volume = volMatch ? volMatch[1].replace(/\s+/g, ' ').trim() : '';
   if (volMatch) rest = rest.slice(volMatch[0].length).trim();
 
-  const brandMatch = rest.match(/^([A-Z][A-Z0-9 /®Ⓡ]{1,30})/);
-  const brand = brandMatch ? brandMatch[1].trim() : '';
-  if (brandMatch) rest = rest.slice(brandMatch[0].length);
+  const brandMatch = rest.match(/(SEALUXE|iLiFE|ILIFE|CARICH|NILRICH|KARDLI|SONPHESKIN|GREENLEAF|YUE ZHONGGUI|MOON FLOWER)/i);
+  const brand = brandMatch ? brandMatch[1] : '';
+  if (brandMatch) rest = rest.slice(brandMatch.index + brandMatch[0].length);
 
   return { volume, brand, rest: rest.replace(/^[\s\-–—:]+/, '').trim() };
 }
 
 function textToHtml(text) {
   const escape = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const blocks = String(text || '')
+  const cleaned = String(text || '').replace(/([.!?])(?=[А-ЯЁA-Z«"(])/g, '$1 ');
+  const blocks = cleaned
     .split(/\n\s*\n/)
     .map((b) => b.trim())
     .filter(Boolean);
@@ -263,8 +265,15 @@ async function parsePartnerPage() {
 
   for (const p of products) {
     const text = p.paragraphs
-      .map((h) => h.replace(/<br\s*\/?>/gi, '\n'))
-      .join('\n')
+      .map((h) =>
+        h
+          .replace(/<br\s*\/?>/gi, '\n')
+          .replace(/<\/p>/gi, '\n\n')
+          .replace(/<\/li>/gi, '\n')
+          .replace(/<li[^>]*>/gi, '• ')
+          .replace(/<\/(div|h[1-6]|ul|ol)>/gi, '\n'),
+      )
+      .join('\n\n')
       .replace(/<[^>]+>/g, '')
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
@@ -346,6 +355,10 @@ async function crawlMarketplace() {
 async function downloadImage(url, article) {
   const fileName = article.replace(/[\\/:*?"<>|]/g, '-') + '.webp';
   const dest = path.join(IMG_DIR, fileName);
+
+  if (!REFRESH_IMAGES && fs.existsSync(dest) && fs.statSync(dest).size > 500) {
+    return fileName;
+  }
 
   const large = url.replace('/medium/', '/large/');
   const res = await fetch(large, { headers: { 'User-Agent': UA } });

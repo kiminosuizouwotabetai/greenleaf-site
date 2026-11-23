@@ -88,6 +88,11 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
                 data-category={p.category}
                 data-subcategory={p.subcategory}
                 data-title={p.title}
+                data-id={p.id}
+                data-article={p.article}
+                data-volume={p.volume}
+                data-brand={p.brand}
+                data-image={p.images[0] || '/logo.svg'}
               >
                 <div class="product-image">
                   <img src={p.images[0] || '/logo.svg'} alt={p.title} loading="lazy" onerror="this.src='/logo.svg'" />
@@ -131,7 +136,7 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
     </div>
   </div>
 
-  <script define:vars={{ products }}>
+  <script>
     document.addEventListener('DOMContentLoaded', () => {
       const grid = document.getElementById('productsGrid');
       const cards = Array.from(grid.querySelectorAll('.product-card'));
@@ -250,6 +255,24 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
           .forEach((card) => grid.appendChild(card));
       };
 
+      const syncSubcatAvailability = () => {
+        const allowed = new Set();
+        ordered().forEach((card) => {
+          if (state.cat === 'Все' || card.dataset.category === state.cat) {
+            allowed.add(card.dataset.subcategory);
+          }
+        });
+
+        subcatBtns.forEach((btn) => {
+          btn.hidden = !(btn.dataset.value === 'Все' || allowed.has(btn.dataset.value));
+        });
+
+        if (state.sub !== 'Все' && !allowed.has(state.sub)) {
+          state.sub = 'Все';
+          subcatBtns.forEach((b, i) => b.classList.toggle('active', i === 0));
+        }
+      };
+
       const bindFilter = (btns, key) => {
         btns.forEach((btn) => {
           btn.addEventListener('click', () => {
@@ -257,6 +280,7 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
             btn.classList.add('active');
             state[key] = btn.dataset.value;
             state.page = 1;
+            if (key === 'cat') syncSubcatAvailability();
             apply();
           });
         });
@@ -271,7 +295,10 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
         state.sort = 'default';
         sortSelect.value = 'default';
         [catBtns, subcatBtns].forEach((btns) => {
-          btns.forEach((b, i) => b.classList.toggle('active', i === 0));
+          btns.forEach((b, i) => {
+            b.classList.toggle('active', i === 0);
+            b.hidden = false;
+          });
         });
         state.page = 1;
         sortCards();
@@ -299,20 +326,32 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
       const modalCategory = document.getElementById('modalCategory');
       const modalMeta = document.getElementById('modalMeta');
 
-      document.querySelectorAll('.details-btn').forEach((btn) => {
-        btn.addEventListener('click', (e) => {
-          const id = parseInt(e.currentTarget.dataset.id, 10);
-          const product = products.find((p) => p.id === id);
-          if (!product) return;
+      let descriptionsPromise = null;
+      const loadDescriptions = () => {
+        if (!descriptionsPromise) {
+          descriptionsPromise = fetch('/catalog/data.json')
+            .then((r) => (r.ok ? r.json() : {}))
+            .catch(() => ({}));
+        }
+        return descriptionsPromise;
+      };
 
-          modalImg.src = product.images[0] || '/logo.svg';
+      document.querySelectorAll('.details-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+          const card = e.currentTarget.closest('.product-card');
+          if (!card) return;
+
+          modalImg.src = card.dataset.image || '/logo.svg';
           modalImg.onerror = function () { this.src = '/logo.svg'; };
-          modalTitle.textContent = product.title;
-          modalDesc.innerHTML = product.description;
-          modalCategory.textContent = product.subcategory;
-          modalMeta.textContent = [product.volume, product.brand].filter(Boolean).join(' · ');
+          modalTitle.textContent = card.dataset.title || '';
+          modalCategory.textContent = card.dataset.subcategory || '';
+          modalMeta.textContent = [card.dataset.volume, card.dataset.brand].filter(Boolean).join(' · ');
+          modalDesc.innerHTML = '<p class="modal-loading">Загружаю описание…</p>';
           modal.classList.add('active');
           document.body.style.overflow = 'hidden';
+
+          const descriptions = await loadDescriptions();
+          modalDesc.innerHTML = descriptions[String(card.dataset.id)] || '';
         });
       });
 
@@ -662,4 +701,6 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
   @media (max-width: 700px) {
     .page-btn { min-width: 34px; padding: 7px 8px; font-size: 0.85rem; }
   }
+
+  .modal-loading { color: var(--text-muted); font-style: italic; }
 </style>
