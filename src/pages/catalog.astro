@@ -13,6 +13,37 @@ const products = allProducts.map((p) => ({
 
 const categories = ['Все', ...new Set(products.map((p) => p.category))];
 const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))];
+const brands = ['Все', ...new Set(products.map((p) => p.brand).filter(Boolean).sort((a, b) => a.localeCompare(b, 'ru')))];
+
+// пастельные цвета подкатегорий — в тон палитре сайта
+const TAG_PALETTE = [
+  { bg: '#E8F5EC', fg: '#1E6D3A' }, // мята
+  { bg: '#FBEDE4', fg: '#8A4B2A' }, // персик
+  { bg: '#EEEAF7', fg: '#4B3A73' }, // лаванда
+  { bg: '#E6F1F8', fg: '#22536B' }, // небесный
+  { bg: '#F8F1E2', fg: '#6B5326' }, // песок
+  { bg: '#FBEAEE', fg: '#7A2F43' }, // роза
+  { bg: '#E4F4F2', fg: '#1F5F58' }, // аква
+  { bg: '#EFF5E0', fg: '#4C6A24' }, // фисташка
+  { bg: '#ECEEFA', fg: '#3C3F78' }, // перивинкль
+  { bg: '#F4EAF3', fg: '#6A3A64' }, // мокко
+  { bg: '#F0F2E3', fg: '#555E2B' }, // олива
+  { bg: '#FDEDE7', fg: '#8A4130' }, // коралл
+  { bg: '#E9F0F7', fg: '#2C5170' }, // пудрово-голубой
+  { bg: '#FBF6E4', fg: '#6E5A22' }, // крем
+  { bg: '#F3E9F0', fg: '#5E3552' }, // слива
+  { bg: '#EAF2E1', fg: '#3F6B2E' }, // шалфей
+  { bg: '#FBEFE9', fg: '#7A4630' }, // терракота
+  { bg: '#F7F0F4', fg: '#6B3A56' }, // лавандово-розовый
+  { bg: '#E7F3F0', fg: '#1D5C56' }, // тил
+  { bg: '#F6F3EA', fg: '#5F5533' }, // лён
+  { bg: '#EFF2F8', fg: '#33436B' }, // туман
+  { bg: '#F9F0E9', fg: '#74492F' }, // карамель
+];
+
+const tagColor = new Map(
+  subcategories.filter((c) => c !== 'Все').map((c, i) => [c, TAG_PALETTE[i % TAG_PALETTE.length]]),
+);
 ---
 <Base
   title="Каталог продукции — Greenleaf в Геленджике"
@@ -34,6 +65,18 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
           </button>
 
           <div class="filters-body" id="filtersBody">
+            <div class="filter-block">
+              <h2 class="filter-title">Поиск</h2>
+              <input
+                type="search"
+                id="searchInput"
+                class="search-input"
+                placeholder="Название или артикул"
+                autocomplete="off"
+                aria-label="Поиск по каталогу"
+              />
+            </div>
+
             <div class="filter-block">
             <h2 class="filter-title">Категория</h2>
             <div class="filters" id="catFilters">
@@ -58,6 +101,22 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
                   class="filter-btn"
                   class:list={[{ active: c === 'Все' }]}
                   data-type="subcategory"
+                  data-value={c}
+                  style={c !== 'Все' ? `--tag-bg:${tagColor.get(c).bg}` : undefined}
+                >{c}</button>
+              ))}
+            </div>
+          </div>
+
+          <div class="filter-block">
+            <h2 class="filter-title">Бренд</h2>
+            <div class="filters" id="brandFilters">
+              {brands.map((c) => (
+                <button
+                  type="button"
+                  class="filter-btn"
+                  class:list={[{ active: c === 'Все' }]}
+                  data-type="brand"
                   data-value={c}
                 >{c}</button>
               ))}
@@ -93,12 +152,18 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
                 data-volume={p.volume}
                 data-brand={p.brand}
                 data-image={p.images[0] || '/logo.svg'}
+                data-search={[p.title, p.article, p.brand, p.subcategory, p.category].join(' ').toLowerCase()}
+                data-tag-bg={tagColor.get(p.subcategory)?.bg}
+                data-tag-fg={tagColor.get(p.subcategory)?.fg}
               >
                 <div class="product-image">
                   <img src={p.images[0] || '/logo.svg'} alt={p.title} loading="lazy" onerror="this.src='/logo.svg'" />
                 </div>
                 <div class="product-info">
-                  <span class="category-tag">{p.subcategory}</span>
+                  <span
+                    class="category-tag"
+                    style={`--tag-bg:${tagColor.get(p.subcategory)?.bg};--tag-fg:${tagColor.get(p.subcategory)?.fg}`}
+                  >{p.subcategory}</span>
                   <h3>{p.title}</h3>
                   {p.short && <p class="short">{p.short}</p>}
                   <div class="product-footer">
@@ -111,7 +176,7 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
 
           <nav class="pagination" id="pagination" aria-label="Страницы каталога" hidden></nav>
 
-          <p class="empty-state" id="emptyState" hidden>По этим фильтрам ничего не нашлось. Попробуйте сбросить.</p>
+          <p class="empty-state" id="emptyState" hidden>Ничего не нашлось. Измените запрос или сбросьте фильтры.</p>
         </div>
       </div>
     </div>
@@ -156,7 +221,10 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
         filtersToggle.setAttribute('aria-expanded', String(open));
       });
 
-      const state = { cat: 'Все', sub: 'Все', sort: 'default', page: 1 };
+      const brandBtns = Array.from(document.querySelectorAll('#brandFilters .filter-btn'));
+      const searchInput = document.getElementById('searchInput');
+
+      const state = { cat: 'Все', sub: 'Все', brand: 'Все', q: '', sort: 'default', page: 1 };
       const PER_PAGE = 24;
 
       const ordered = () => Array.from(grid.querySelectorAll('.product-card'));
@@ -170,9 +238,18 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
         return many;
       };
 
-      const matches = (card) =>
-        (state.cat === 'Все' || card.dataset.category === state.cat) &&
-        (state.sub === 'Все' || card.dataset.subcategory === state.sub);
+      const field = (card, dim) =>
+        dim === 'cat' ? card.dataset.category
+          : dim === 'sub' ? card.dataset.subcategory
+            : card.dataset.brand;
+
+      const matches = (card) => {
+        if (state.cat !== 'Все' && card.dataset.category !== state.cat) return false;
+        if (state.sub !== 'Все' && card.dataset.subcategory !== state.sub) return false;
+        if (state.brand !== 'Все' && card.dataset.brand !== state.brand) return false;
+        if (state.q && !(card.dataset.search || '').includes(state.q)) return false;
+        return true;
+      };
 
       const renderPagination = (pages) => {
         pagination.innerHTML = '';
@@ -234,7 +311,11 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
         emptyEl.hidden = list.length !== 0;
         renderPagination(pages);
 
-        const activeFilters = (state.cat !== 'Все' ? 1 : 0) + (state.sub !== 'Все' ? 1 : 0);
+        const activeFilters =
+          (state.cat !== 'Все' ? 1 : 0) +
+          (state.sub !== 'Все' ? 1 : 0) +
+          (state.brand !== 'Все' ? 1 : 0) +
+          (state.q ? 1 : 0);
         filtersCount.textContent = String(activeFilters);
         filtersCount.hidden = activeFilters === 0;
       };
@@ -255,32 +336,44 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
           .forEach((card) => grid.appendChild(card));
       };
 
-      const syncSubcatAvailability = () => {
-        const allowed = new Set();
+      const BTNS = { cat: catBtns, sub: subcatBtns, brand: brandBtns };
+
+      const setActive = (btns, value) =>
+        btns.forEach((b) => b.classList.toggle('active', b.dataset.value === value));
+
+      // какие значения встречаются у товаров при остальных выбранных фильтрах
+      const allowedValues = (dim) => {
+        const set = new Set();
         ordered().forEach((card) => {
-          if (state.cat === 'Все' || card.dataset.category === state.cat) {
-            allowed.add(card.dataset.subcategory);
+          if (dim !== 'cat' && state.cat !== 'Все' && card.dataset.category !== state.cat) return;
+          if (dim !== 'sub' && state.sub !== 'Все' && card.dataset.subcategory !== state.sub) return;
+          if (dim !== 'brand' && state.brand !== 'Все' && card.dataset.brand !== state.brand) return;
+          const v = field(card, dim);
+          if (v) set.add(v);
+        });
+        return set;
+      };
+
+      const syncAvailability = () => {
+        ['cat', 'sub', 'brand'].forEach((dim) => {
+          const allowed = allowedValues(dim);
+          BTNS[dim].forEach((btn) => {
+            btn.hidden = !(btn.dataset.value === 'Все' || allowed.has(btn.dataset.value));
+          });
+          if (state[dim] !== 'Все' && !allowed.has(state[dim])) {
+            state[dim] = 'Все';
+            setActive(BTNS[dim], 'Все');
           }
         });
-
-        subcatBtns.forEach((btn) => {
-          btn.hidden = !(btn.dataset.value === 'Все' || allowed.has(btn.dataset.value));
-        });
-
-        if (state.sub !== 'Все' && !allowed.has(state.sub)) {
-          state.sub = 'Все';
-          subcatBtns.forEach((b, i) => b.classList.toggle('active', i === 0));
-        }
       };
 
       const bindFilter = (btns, key) => {
         btns.forEach((btn) => {
           btn.addEventListener('click', () => {
-            btns.forEach((b) => b.classList.remove('active'));
-            btn.classList.add('active');
+            setActive(btns, btn.dataset.value);
             state[key] = btn.dataset.value;
             state.page = 1;
-            if (key === 'cat') syncSubcatAvailability();
+            syncAvailability();
             apply();
           });
         });
@@ -288,19 +381,33 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
 
       bindFilter(catBtns, 'cat');
       bindFilter(subcatBtns, 'sub');
+      bindFilter(brandBtns, 'brand');
+
+      let searchTimer = null;
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          state.q = searchInput.value.trim().toLowerCase();
+          state.page = 1;
+          apply();
+        }, 150);
+      });
 
       resetBtn.addEventListener('click', () => {
         state.cat = 'Все';
         state.sub = 'Все';
+        state.brand = 'Все';
+        state.q = '';
         state.sort = 'default';
+        state.page = 1;
+        searchInput.value = '';
         sortSelect.value = 'default';
-        [catBtns, subcatBtns].forEach((btns) => {
+        Object.values(BTNS).forEach((btns) => {
           btns.forEach((b, i) => {
             b.classList.toggle('active', i === 0);
             b.hidden = false;
           });
         });
-        state.page = 1;
         sortCards();
         apply();
       });
@@ -345,6 +452,8 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
           modalImg.onerror = function () { this.src = '/logo.svg'; };
           modalTitle.textContent = card.dataset.title || '';
           modalCategory.textContent = card.dataset.subcategory || '';
+          modalCategory.style.background = card.dataset.tagBg || '';
+          modalCategory.style.color = card.dataset.tagFg || '';
           modalMeta.textContent = [card.dataset.volume, card.dataset.brand].filter(Boolean).join(' · ');
           modalDesc.innerHTML = '<p class="modal-loading">Загружаю описание…</p>';
           modal.classList.add('active');
@@ -512,8 +621,8 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
 
   .category-tag {
     display: inline-block;
-    background: var(--brand-green-light);
-    color: var(--brand-green-dark);
+    background: var(--tag-bg, var(--brand-green-light));
+    color: var(--tag-fg, var(--brand-green-dark));
     padding: 3px 8px;
     font-size: 0.68rem;
     font-weight: 600;
@@ -703,4 +812,35 @@ const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))]
   }
 
   .modal-loading { color: var(--text-muted); font-style: italic; }
+
+  .search-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .search-input:focus { outline: none; border-color: var(--brand-green); }
+
+  #subcatFilters .filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #subcatFilters .filter-btn::before {
+    content: '';
+    width: 9px;
+    height: 9px;
+    flex-shrink: 0;
+    background: var(--tag-bg, transparent);
+    border: 1px solid rgba(0, 0, 0, 0.16);
+  }
+
+  @media (max-width: 900px) {
+    #subcatFilters .filter-btn { display: inline-flex; }
+    #subcatFilters .filter-btn::before { width: 8px; height: 8px; }
+  }
 </style>

@@ -152,8 +152,22 @@ function splitMeta(text) {
   if (volMatch) rest = rest.slice(volMatch[0].length).trim();
 
   const brandMatch = rest.match(/(SEALUXE|iLiFE|ILIFE|CARICH|NILRICH|KARDLI|SONPHESKIN|GREENLEAF|YUE ZHONGGUI|MOON FLOWER)/i);
-  const brand = brandMatch ? brandMatch[1] : '';
-  if (brandMatch) rest = rest.slice(brandMatch.index + brandMatch[0].length);
+  const BRAND_CANON = {
+    sealuxe: 'SEALUXE',
+    ilife: 'iLiFE',
+    carich: 'CARICH',
+    nilrich: 'NILRICH',
+    kardli: 'KARDLI',
+    sonpheskin: 'SONPHESKIN',
+    greenleaf: 'GREENLEAF',
+    'yue zhonggui': 'YUE ZHONGGUI',
+    'moon flower': 'MOON FLOWER',
+  };
+  const brand = brandMatch ? (BRAND_CANON[brandMatch[1].toLowerCase()] || brandMatch[1]) : '';
+  if (brandMatch) {
+    rest = rest.slice(brandMatch.index + brandMatch[0].length);
+    rest = rest.replace(/^\s*\/\s*(SEALUXE|iLiFE|ILIFE|CARICH|NILRICH|KARDLI|SONPHESKIN)\b\s*/i, '');
+  }
 
   return { volume, brand, rest: rest.replace(/^[\s\-–—:]+/, '').trim() };
 }
