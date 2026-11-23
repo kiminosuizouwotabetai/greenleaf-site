@@ -614,9 +614,9 @@ import Base from '../layouts/Base.astro';
   .modal-close:hover { color: var(--brand-green); }
 
   .modal-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
     padding: 22px;
   }
 
@@ -630,7 +630,7 @@ import Base from '../layouts/Base.astro';
     min-height: 0;
   }
 
-  .modal-image img { max-width: 100%; max-height: 380px; object-fit: contain; display: block; }
+  .modal-image img { max-width: 100%; max-height: 340px; object-fit: contain; display: block; }
 
   .modal-text h2 { font-size: 1.3rem; margin: 0 0 10px; }
   .modal-meta { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 14px; }
@@ -718,7 +718,7 @@ import Base from '../layouts/Base.astro';
   @media (max-width: 768px) {
     .modal-overlay { padding: 0; align-items: flex-start; }
     .modal-content { max-height: 100vh; min-height: 100vh; max-width: 100%; }
-    .modal-body { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+    .modal-body { gap: 16px; padding: 16px; }
     .modal-image { padding: 10px; }
     .modal-image img { max-height: 42vh; }
     .modal-text h2 { font-size: 1.15rem; }

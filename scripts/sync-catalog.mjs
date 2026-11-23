@@ -17,6 +17,7 @@ import { createRequire } from 'node:module';
 import * as cheerio from 'cheerio';
 import sharp from 'sharp';
 import Database from 'better-sqlite3';
+import { classify, CATEGORY_ORDER, SUBCATEGORY_ORDER } from './taxonomy.mjs';
 
 const require = createRequire(import.meta.url);
 const XLSX = require('xlsx');
@@ -220,8 +221,11 @@ function parseCards(html) {
     const art = card.find('small').first().text().match(/Артикул\s+([A-Z0-9/\-]+)/i);
     if (!art) return;
 
+    const idMatch = (card.find('.marketplace-product-card__name').attr('href') || '').match(/\/(\d+)\/?$/);
+
     out.push({
       article: art[1].trim(),
+      marketId: idMatch ? Number(idMatch[1]) : 0,
       name: card.find('.marketplace-product-card__name').text().replace(/\s+/g, ' ').trim(),
       image: card.find('img').attr('src') || '',
       price: card.find('strong').first().text().replace(/\s+/g, ' ').trim(),
@@ -289,15 +293,70 @@ async function crawlAll(categories) {
     }
   }
 
-  const result = [...byArticle.values()];
-  result.forEach((p) => {
+  fs.writeFileSync(CACHE, JSON.stringify([...byArticle.values()], null, 1));
+  console.log(`  всего товаров: ${byArticle.size}`);
+
+  return [...byArticle.values()];
+}
+
+// дедуп по названию + раскладка по нашим категориям
+function postProcess(list) {
+  // отбрасываем товары с заглушкой вместо картинки
+  const PLACEHOLDER = /zummXD2dvAtI|no[-_]?image|placeholder|default[-_]?image/i;
+  const before = list.length;
+  list = list.filter((p) => p.image && !PLACEHOLDER.test(p.image));
+  console.log(`  без картинки убрано: ${before - list.length}`);
+
+  for (const p of list) {
+    if (!p.marketId && p.url) {
+      const m = String(p.url).match(/\/(\d+)\/?$/);
+      p.marketId = m ? Number(m[1]) : 0;
+    }
+  }
+
+  // известные опечатки в названиях маркетплейса
+  for (const p of list) {
+    p.name = String(p.name || '').replace(/\bBULE\b/gi, 'BLUE');
+  }
+
+  const STATUS_RANK = {
+    'Есть у подключённых партнёров': 0,
+    'Уточните срок поставки': 1,
+    'Есть в СЦ · онлайн-заказ недоступен': 2,
+  };
+  const normName = (value) =>
+    String(value || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]+/g, ' ').trim();
+
+  const byName = new Map();
+  for (const p of list) {
+    const key = normName(p.name);
+    const prev = byName.get(key);
+    if (!prev) {
+      byName.set(key, p);
+      continue;
+    }
+    const rank = (x) => STATUS_RANK[x.stock] ?? 3;
+    const better =
+      rank(p) < rank(prev) ||
+      (rank(p) === rank(prev) && p.marketId > prev.marketId) ||
+      (rank(p) === rank(prev) && p.marketId === prev.marketId && p.article.length < prev.article.length);
+    if (better) byName.set(key, p);
+  }
+
+  const deduped = [...byName.values()];
+  console.log(`  дублей по названию убрано: ${list.length - deduped.length}`);
+
+  deduped.forEach((p) => {
     p.brand = brandOf(p.name);
     p.volume = volumeOf(p.name);
+    p.mpParent = p.mpParent || p.parent;
+    p.mpSub = p.mpSub || p.subcategory;
+    const [cat, sub] = classify(p);
+    p.parent = cat;
+    p.subcategory = sub;
   });
-  fs.writeFileSync(CACHE, JSON.stringify(result, null, 1));
-  console.log(`  всего товаров: ${result.length}`);
 
-  return result;
+  return deduped;
 }
 
 // ---------- описания ----------
@@ -418,7 +477,7 @@ async function main() {
   fs.mkdirSync(IMG_DIR, { recursive: true });
 
   const categories = await parseCategories();
-  const market = await crawlAll(categories);
+  const market = postProcess(await crawlAll(categories));
 
   console.log(`\nТоваров на маркетплейсе: ${market.length}`);
 
@@ -476,6 +535,10 @@ async function main() {
 
   for (const item of legacy) {
     if (used.has(item.article)) continue;
+    const legacyCat = item.category
+      ? item.category.charAt(0).toUpperCase() + item.category.slice(1).toLowerCase()
+      : '';
+
     market.push({
       article: item.article,
       name: item.name,
@@ -483,8 +546,8 @@ async function main() {
       price: '',
       stock: 'legacy',
       url: '',
-      parent: item.category || 'Ассортимент',
-      subcategory: item.subcategory || 'Разное',
+      parent: legacyCat || 'Ассортимент',
+      subcategory: item.subcategory ? item.subcategory.charAt(0).toUpperCase() + item.subcategory.slice(1).toLowerCase() : 'Разное',
       description: textToHtml(item.description),
       legacy: true,
     });
@@ -494,19 +557,21 @@ async function main() {
   console.log(`  добавлено из исходной таблицы: ${addedLegacy}`);
 
   // ---- порядок категорий ----
-  const parentOrder = categories.groups.map((p) => p.name);
-  const rank = (name) => {
-    const i = parentOrder.indexOf(name);
-    return i === -1 ? parentOrder.length : i;
+  const catRank = (name) => {
+    const i = CATEGORY_ORDER.indexOf(name);
+    return i === -1 ? CATEGORY_ORDER.length : i;
+  };
+  const subRank = (cat, sub) => {
+    const list = SUBCATEGORY_ORDER[cat] || [];
+    const i = list.indexOf(sub);
+    return i === -1 ? list.length : i;
   };
 
   market.sort((a, b) => {
-    const p = rank(a.parent) - rank(b.parent);
-    if (p) return p;
-    if (a.parent === b.parent) {
-      const s = String(a.subcategory).localeCompare(String(b.subcategory), 'ru');
-      if (s) return s;
-    }
+    const c = catRank(a.parent) - catRank(b.parent);
+    if (c) return c;
+    const s = subRank(a.parent, a.subcategory) - subRank(b.parent, b.subcategory);
+    if (s) return s;
     return a.name.localeCompare(b.name, 'ru');
   });
 
@@ -536,6 +601,8 @@ async function main() {
     '№': i + 1,
     'Категория': p.parent,
     'Подкатегория': p.subcategory,
+    'Раздел маркетплейса': p.mpParent || '',
+    'Подкатегория маркетплейса': p.mpSub || '',
     'Артикул': p.article,
     'Название': p.name,
     'Описание': stripTags(p.description),
@@ -547,8 +614,8 @@ async function main() {
 
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [
-    { wch: 4 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 55 }, { wch: 80 },
-    { wch: 26 }, { wch: 16 }, { wch: 50 }, { wch: 30 },
+    { wch: 4 }, { wch: 24 }, { wch: 24 }, { wch: 24 }, { wch: 26 }, { wch: 12 },
+    { wch: 55 }, { wch: 80 }, { wch: 26 }, { wch: 16 }, { wch: 50 }, { wch: 30 },
   ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Товары');
