@@ -1,16 +1,15 @@
-// Синхронизация каталога: партнёрская страница + маркетплейс → база + Excel.
+// Синхронизация каталога c маркетплейса greenleaf.online.
 //
-//   node scripts/sync-catalog.mjs              — полный цикл (обходит маркетплейс)
-//   node scripts/sync-catalog.mjs --use-cache  — не обходить маркетплейс, взять прошлый обход
-//   node scripts/sync-catalog.mjs --debug      — подробный лог отбракованных товаров
+//   node scripts/sync-catalog.mjs               — полный цикл
+//   node scripts/sync-catalog.mjs --use-cache   — без повторного обхода категорий
+//   node scripts/sync-catalog.mjs --refresh-desc — перекачать описания
+//   node scripts/sync-catalog.mjs --debug       — подробности
 //
-// Источники:
-//   страница партнёра   — название, артикул (из имени картинки), цены, описание, категории
-//   greenleaf.online    — наличие, цена, ссылка, картинка
 // Результат:
-//   data/greenleaf-full.xlsx      — все товары с партнёрской страницы (для просмотра)
-//   data/catalog.db               — только товары «Есть у подключённых партнёров»
-//   public/images/catalog/*.webp  — картинки с маркетплейса
+//   data/catalog.db               — товары
+//   data/greenleaf-full.xlsx      — выгрузка для просмотра
+//   public/images/catalog/*.webp  — картинки
+//   data/catalog.json             — данные для страницы каталога (через эндпоинт)
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -23,170 +22,35 @@ const require = createRequire(import.meta.url);
 const XLSX = require('xlsx');
 
 const ROOT = process.cwd();
-const PARTNER_URL =
-  'https://xn--80aaajcmapeahqleykmtil0bk6a7d8m.xn--p1ai/' +
-  encodeURIComponent('наталья-марьясова-г-геленджик') +
-  '/';
-const MARKET_BASE = 'https://greenleaf.online';
+const MARKET = 'https://greenleaf.online';
 const CACHE = path.join(ROOT, 'data', 'marketplace-cache.json');
-const XLSX_OUT = path.join(ROOT, 'data', 'greenleaf-full.xlsx');
-const DB_PATH = path.join(ROOT, 'data', 'catalog.db');
-const IMG_DIR = path.join(ROOT, 'public', 'images', 'catalog');
 const DESC_CACHE = path.join(ROOT, 'data', 'descriptions-cache.json');
+const CAT_CACHE = path.join(ROOT, 'data', 'categories-cache.json');
 const LEGACY_XLSX = path.join(ROOT, 'data', 'greenleaf.xlsx');
+const DB_PATH = path.join(ROOT, 'data', 'catalog.db');
+const XLSX_OUT = path.join(ROOT, 'data', 'greenleaf-full.xlsx');
+const IMG_DIR = path.join(ROOT, 'public', 'images', 'catalog');
 
 const USE_CACHE = process.argv.includes('--use-cache');
-const DEBUG = process.argv.includes('--debug');
-const DRY = process.argv.includes('--dry');
-const REFRESH_IMAGES = process.argv.includes('--refresh-images');
 const REFRESH_DESC = process.argv.includes('--refresh-desc');
+const DEBUG = process.argv.includes('--debug');
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
 
-const AVAILABLE = 'Есть у подключённых партнёров';
-
-// категория макияжа на сайте встречается с опечаткой
-const CATEGORY_FIX = {
-  'макияж и парюм': 'Макияж и парфюм',
-  'макияж и парфюм': 'Макияж и парфюм',
-};
-
-const SUBCATEGORY_ORDER = [
-  'Очищение и демакияж',
-  'Комплексный уход',
-  'Основной уход',
-  'Маски',
-  'Базы и ровный тон',
-  'Декоративная косметика',
-  'Коллекция ароматов',
-  'Шампуни и бальзамы',
-  'Маски, масла, укладка',
-  'Гели для душа',
-  'Уходовые средства',
-  'Мыло для лица и тела',
-  'Зубные пасты',
-  'Ополаскиватели и щетки',
-  'Женская гигиена',
-  'Предметы личной гигиены',
-  'Детская гигиена',
-  'БАДы и витамины',
-  'Полезные напитки',
-  'Чай, кофе',
-  'Здоровое тело',
-  'Средства для стирки',
-  'Безопасная уборка дома и кухни',
-  'Разное',
-];
-
-const CATEGORY_ORDER = [
-  'Уход за кожей лица',
-  'Макияж и парфюм',
-  'Уход для волос',
-  'Уход за кожей тела',
-  'Уход за полостью рта',
-  'Гигиена',
-  'Товары для детей',
-  'Здоровье',
-  'Товары для дома и быта',
-  'Ассортимент',
-];
-
-// «Артикул SAA069» -> «SAA069»
-const cleanArticle = (raw) =>
-  String(raw || '')
-    .replace(/^\s*артикул\s*:?\s*/i, '')
-    .trim();
-
-const normCase = (s) => {
-  const t = String(s || '').replace(/\s+/g, ' ').trim();
-  if (!t) return '';
-  return t[0].toUpperCase() + t.slice(1).toLowerCase();
-};
-
-const fixCategory = (name) => {
-  const n = normCase(name);
-  return CATEGORY_FIX[n.toLowerCase()] || n;
-};
-
-const fixSubcategory = (name) => {
-  const n = normCase(name);
-  return n === 'Бады и витамины' ? 'БАДы и витамины' : n;
-};
-
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const STOP_WORDS = new Set(['для', 'лица', 'кожи', 'уход', 'серия', 'средство', 'товар']);
-
-const normTokens = (value) => {
-  const words = String(value || '')
-    .toLowerCase()
-    .replace(/ё/g, 'е')
-    .replace(/[^a-zа-я0-9]+/g, ' ')
-    .split(' ')
-    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
-  return new Set(words);
-};
-
-// бренд из начала названия маркетплейса
-const BRAND_WORDS = ['SEALUXE', 'iLiFE', 'ILIFE', 'CARICH', 'NILRICH', 'KARDLI', 'SONPHESKIN', 'GREENLEAF', 'YUE ZHONGGUI', 'MOON FLOWER'];
-const marketBrand = (name) => {
-  const lower = String(name || '').toLowerCase();
-  const hit = BRAND_WORDS.find((b) => lower.startsWith(b.toLowerCase()));
-  return hit ? hit.toLowerCase().replace('ilife', 'ilife') : '';
-};
-
-// лучший товар маркетплейса: сначала по артикулу с картинки, потом по названию
-const findMatch = (product, marketList, marketByArticle) => {
-  const A = normTokens(product.name);
-  if (!A.size) return null;
-
-  const brand = String(product.brand || '').toLowerCase();
-
-  const scoreOf = (m) => {
-    let shared = 0;
-    for (const token of A) if (m.tokens.has(token)) shared += 1;
-    return { shared, score: shared / Math.max(1, Math.min(A.size, m.tokens.size)) };
-  };
-
-  const brandOk = (m) => {
-    const mb = marketBrand(m.name);
-    if (!brand || !mb) return true;
-    return mb === brand;
-  };
-
-  // 1. артикул, вычисленный из картинки партнёрской страницы
-  if (product.article) {
-    const direct = marketByArticle[product.article];
-    if (direct) {
-      const { shared, score } = scoreOf({ tokens: normTokens(direct.name) });
-      if (shared >= 2 && score >= 0.4 && brandOk({ name: direct.name })) {
-        return { ...direct, score: Number(score.toFixed(2)) };
-      }
+async function pool(items, limit, worker) {
+  let index = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (index < items.length) {
+      const i = index;
+      index += 1;
+      await worker(items[i], i);
     }
-  }
-
-  // 2. поиск по названию, со строгим порогом и проверкой бренда
-  let best = null;
-  let bestScore = 0;
-  let bestShared = 0;
-
-  for (const m of marketList) {
-    if (!brandOk(m)) continue;
-    const { shared, score } = scoreOf(m);
-    if (shared < 2) continue;
-    if (score < 0.75) continue;
-    if (shared < 3 && score < 0.85) continue;
-
-    if (score > bestScore || (score === bestScore && shared > bestShared)) {
-      best = m;
-      bestScore = score;
-      bestShared = shared;
-    }
-  }
-
-  return best ? { ...best, score: Number(bestScore.toFixed(2)) } : null;
-};
+  });
+  await Promise.all(runners);
+}
 
 async function fetchText(url, tries = 3) {
   for (let i = 0; i < tries; i += 1) {
@@ -196,66 +60,43 @@ async function fetchText(url, tries = 3) {
       return await res.text();
     } catch (err) {
       if (i === tries - 1) throw err;
-      await sleep(1200);
+      await sleep(1000);
     }
   }
   return '';
 }
 
-// ---------- 1. партнёрская страница ----------
+// ---------- утилиты ----------
 
-function parseVolumeAndBrand(html) {
-  const text = String(html || '').replace(/<br\s*\/?>/gi, '\n');
-  const lines = text
-    .split('\n')
-    .map((l) => l.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim())
-    .filter(Boolean);
+const BRAND_WORDS = ['SEALUXE', 'iLiFE', 'CARICH', 'NILRICH', 'KARDLI', 'SONPHESKIN', 'GREENLEAF', 'YUE ZHONGGUI', 'MOON FLOWER'];
 
-  if (!lines.length) return { volume: '', brand: '' };
+const brandOf = (name) => {
+  const lower = String(name || '').toLowerCase();
+  const hit = BRAND_WORDS.find((b) => lower.startsWith(b.toLowerCase()));
+  if (!hit) return '';
+  return hit === 'ILIFE' ? 'iLiFE' : hit;
+};
 
-  const first = lines[0];
-  const volMatch = first.match(/^(?:ОБЪЕМ|ОБЪЁМ|VOLUME)?\s*([\d.,]+\s*(?:мл|г|гр|шт|ml|g))\b/i);
-  const volume = volMatch ? volMatch[1].replace(/\s+/g, ' ') : '';
-  const rest = volMatch ? first.slice(volMatch[0].length).trim() : first;
+const volumeOf = (name) => {
+  const m = String(name || '').match(/(\d[\d\s.,]*)\s*(мл|гр|г|кг|шт|штук|пар[аы]?|пакет[а-яё]*)(?![а-яё])/i);
+  return m ? `${m[1].trim()} ${m[2].toLowerCase()}` : '';
+};
 
-  const brand = lines[1] || rest || '';
-  return { volume, brand: brand.replace(/&nbsp;/g, ' ').trim() };
-}
+const cleanArticle = (raw) =>
+  String(raw || '')
+    .replace(/^\s*артикул\s*:?\s*/i, '')
+    .trim();
 
-function splitMeta(text) {
-  let rest = String(text || '').replace(/\u00a0/g, ' ').replace(/[ \t]+/g, ' ').trim();
-  rest = rest.replace(/^(?:ОБЪЕМ|ОБЪЁМ|VOLUME)\s*:?\s*/i, '');
+const escapeHtml = (s) =>
+  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  const volMatch = rest.match(
-    /^(\d[\d\s.,]*\s*(?:мл|гр|г|кг|шт|штук|пара|пар|пакет[а-яё]*|таблет[а-яё]*|саше|уп)(?![а-яё])(?:\s*[хx×*]\s*\d+\s*[А-Яа-яё]{0,12})?)/i,
-  );
-  const volume = volMatch ? volMatch[1].replace(/\s+/g, ' ').trim() : '';
-  if (volMatch) rest = rest.slice(volMatch[0].length).trim();
-
-  const brandMatch = rest.match(/(SEALUXE|iLiFE|ILIFE|CARICH|NILRICH|KARDLI|SONPHESKIN|GREENLEAF|YUE ZHONGGUI|MOON FLOWER)/i);
-  const BRAND_CANON = {
-    sealuxe: 'SEALUXE',
-    ilife: 'iLiFE',
-    carich: 'CARICH',
-    nilrich: 'NILRICH',
-    kardli: 'KARDLI',
-    sonpheskin: 'SONPHESKIN',
-    greenleaf: 'GREENLEAF',
-    'yue zhonggui': 'YUE ZHONGGUI',
-    'moon flower': 'MOON FLOWER',
-  };
-  const brand = brandMatch ? (BRAND_CANON[brandMatch[1].toLowerCase()] || brandMatch[1]) : '';
-  if (brandMatch) {
-    rest = rest.slice(brandMatch.index + brandMatch[0].length);
-    rest = rest.replace(/^\s*\/\s*(SEALUXE|iLiFE|ILIFE|CARICH|NILRICH|KARDLI|SONPHESKIN)\b\s*/i, '');
-  }
-
-  return { volume, brand, rest: rest.replace(/^[\s\-–—:]+/, '').trim() };
-}
+const stripTags = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
 function textToHtml(text) {
-  const escape = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const cleaned = String(text || '').replace(/([.!?])(?=[А-ЯЁA-Z«"(])/g, '$1 ');
+  const cleaned = String(text || '')
+    .replace(/\u00a0/g, ' ')
+    .replace(/([.!?])(?=[А-ЯЁA-Z«"(])/g, '$1 ');
+
   const blocks = cleaned
     .split(/\n\s*\n/)
     .map((b) => b.trim())
@@ -264,133 +105,113 @@ function textToHtml(text) {
   return blocks
     .map((block) => {
       const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
-      if (lines.length && lines.every((l) => /^[➤•\-–—]\s*/.test(l))) {
-        const items = lines.map((l) => `<li>${escape(l.replace(/^[➤•\-–—]\s*/, ''))}</li>`).join('');
-        return `<ul>${items}</ul>`;
+      if (lines.length && lines.every((l) => /^[➤•✔\-–—]\s*/.test(l))) {
+        return `<ul>${lines.map((l) => `<li>${escapeHtml(l.replace(/^[➤•✔\-–—]\s*/, ''))}</li>`).join('')}</ul>`;
       }
-      return `<p>${escape(lines.join(' '))}</p>`;
+      return `<p>${escapeHtml(lines.join(' '))}</p>`;
     })
     .join('');
 }
 
-async function parsePartnerPage() {
-  console.log('Читаю партнёрскую страницу…');
-  const html = await fetchText(PARTNER_URL);
-  console.log(`  получено ${(html.length / 1048576).toFixed(2)} МБ`);
-  const $ = cheerio.load(html);
+const stripEntities = (s) =>
+  String(s || '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&laquo;/g, '«')
+    .replace(/&raquo;/g, '»')
+    .replace(/&mdash;/g, '—')
+    .replace(/&ndash;/g, '–')
+    .replace(/&[a-z]+;/g, ' ')
+    .replace(/[ \t]+/g, ' ');
 
-  const nodes = $('h3, h4, h5, h6, p, img').toArray();
-  const products = [];
+// ---------- категории ----------
 
-  // названия категорий (h3) — чтобы не путать их с подкатегориями
-  const categoryNames = new Set(
-    nodes
-      .filter((el) => el.tagName.toLowerCase() === 'h3')
-      .map((el) => $(el).text().replace(/\s+/g, ' ').trim().toUpperCase()),
-  );
+const ICON_WORDS = new Set(['apps', 'subdirectory_arrow_right', 'chevron_right', 'Все в категории']);
 
-  let category = '';
-  let subcategory = '';
-  let lastImg = '';
-  let current = null;
-
-  for (const el of nodes) {
-    const tag = el.tagName.toLowerCase();
-
-    if (tag === 'img') {
-      lastImg = $(el).attr('src') || '';
-      continue;
-    }
-
-    const text = $(el).text().replace(/\s+/g, ' ').trim();
-    if (!text) continue;
-    const upper = text.toUpperCase();
-
-    if (tag === 'h3') {
-      if (upper !== category) {
-        category = upper;
-        subcategory = '';
-      }
-      current = null;
-      continue;
-    }
-
-    if ((tag === 'h4' || tag === 'h5') && upper !== 'ОТКРЫТЬ ОПИСАНИЕ') {
-      if (!categoryNames.has(upper)) {
-        subcategory = upper;
-        current = null;
-      }
-      continue;
-    }
-
-    if (tag === 'h6' && /КЛИЕНТ/.test(text) && /ПАРТНЕР/.test(text)) {
-      const rub = text.indexOf('₽');
-      const name = (rub > 0 ? text.slice(0, rub) : text).replace(/\s+/g, ' ').trim();
-      const clientMatch = text.match(/КЛИЕНТ\S*\s*([\d\s]+)/i);
-      const partnerMatch = text.match(/ПАРТНЕР\S*\s*([\d\s]*)/i);
-      const client = clientMatch ? Number(clientMatch[1].replace(/\s/g, '')) : null;
-      const partner = partnerMatch && partnerMatch[1].trim() ? Number(partnerMatch[1].replace(/\s/g, '')) : null;
-      const tail = /купон/i.test(text.slice(rub > 0 ? rub : 0)) ? text.slice(rub > 0 ? rub : 0) : '';
-
-      const fileName = decodeURIComponent(lastImg.split('/').pop() || '');
-      const artMatch = fileName.toUpperCase().match(/([A-Z]{2,4}\d{3,4}[A-Z]?)[-_]/);
-
-      current = {
-        name,
-        article: artMatch ? artMatch[1] : '',
-        client,
-        partner,
-        coupon: /купон/i.test(tail) ? tail.replace(/\s+/g, ' ').trim() : '',
-        image: lastImg,
-        category: fixCategory(category),
-        subcategory: fixSubcategory(subcategory),
-        volume: '',
-        brand: '',
-        description: '',
-        paragraphs: [],
-      };
-      products.push(current);
-      continue;
-    }
-
-    if (tag === 'p' && current) {
-      const cls = $(el).attr('class') || '';
-      if (!cls.includes('stk-block-text__text')) continue;
-      current.paragraphs.push($(el).html() || '');
-    }
-  }
-
-  for (const p of products) {
-    const text = p.paragraphs
-      .map((h) =>
-        h
-          .replace(/<br\s*\/?>/gi, '\n')
-          .replace(/<\/p>/gi, '\n\n')
-          .replace(/<\/li>/gi, '\n')
-          .replace(/<li[^>]*>/gi, '• ')
-          .replace(/<\/(div|h[1-6]|ul|ol)>/gi, '\n'),
-      )
-      .join('\n\n')
-      .replace(/<[^>]+>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>');
-    const meta = splitMeta(text);
-    p.volume = meta.volume;
-    p.brand = meta.brand;
-    p.description = textToHtml(meta.rest);
-    delete p.paragraphs;
-  }
-
-  console.log(`  товаров: ${products.length}`);
-  return products;
+function cleanMenuText(text) {
+  const t = String(text || '').replace(/\s+/g, ' ').trim();
+  return t
+    .replace(/^apps\s+/i, '')
+    .replace(/^subdirectory_arrow_right\s+/i, '')
+    .replace(/^chevron_right\s+/i, '')
+    .replace(/\s*\d+$/, '')
+    .trim();
 }
 
-// ---------- 2. маркетплейс ----------
+async function parseCategories() {
+  if (USE_CACHE && fs.existsSync(CAT_CACHE)) {
+    const cached = JSON.parse(fs.readFileSync(CAT_CACHE, 'utf8'));
+    console.log(`Категории из кеша: ${cached.groups.length} категорий`);
+    return cached;
+  }
 
-function parseMarketCards(html) {
+  console.log('Разбираю структуру каталога…');
+  const html = await fetchText(MARKET);
+  const $ = cheerio.load(html);
+
+  // id верхнеуровневых разделов каталога (видны в меню как «Все в категории»)
+  const GROUP_IDS = new Set([
+    'oc-1', 'oc-2', 'oc-3', 'oc-4', 'oc-5', 'oc-6', 'oc-7',
+    'oc-8', 'oc-9', 'oc-10', 'oc-11', 'oc-12', 'oc-13', 'oc-unassigned',
+  ]);
+
+  const links = [];
+  $('a[href*="category=oc-"]').each((_, el) => {
+    const a = $(el);
+    const id = (a.attr('href') || '').match(/category=(oc-[a-z0-9-]+)/)?.[1];
+    const text = cleanMenuText(a.text());
+    if (id && text) links.push({ id, text });
+  });
+
+  const groups = [];
+  const seenSubs = new Set();
+  let current = null;
+
+  for (const link of links) {
+    if (GROUP_IDS.has(link.id)) {
+      // «Все в категории» того же раздела возвращает нас к нему
+      const existing = groups.find((g) => g.id === link.id);
+      if (existing) {
+        current = existing;
+      } else {
+        current = { id: link.id, name: '', subs: [] };
+        groups.push(current);
+      }
+      continue;
+    }
+
+    if (!current) continue;
+    if (seenSubs.has(link.id)) continue; // вторая копия меню
+    seenSubs.add(link.id);
+    current.subs.push({ id: link.id, name: link.text });
+  }
+
+  // названия разделов — из h1 их страниц
+  for (const group of groups) {
+    try {
+      const page = await fetchText(`${MARKET}/?category=${group.id}`);
+      const $page = cheerio.load(page);
+      const name = $page('h1').first().text().replace(/\s+/g, ' ').trim().replace(/\s*Greenleaf\s*$/i, '');
+      group.name = name || group.id;
+      await sleep(120);
+    } catch {
+      group.name = group.id;
+    }
+  }
+
+  const result = { groups };
+  fs.writeFileSync(CAT_CACHE, JSON.stringify(result, null, 1));
+
+  console.log(`  разделов: ${result.groups.length}, подкатегорий: ${result.groups.reduce((n, g) => n + g.subs.length, 0)}`);
+  for (const g of result.groups) console.log(`    ${g.name}: ${g.subs.length} подкатегорий`);
+
+  return result;
+}
+
+// ---------- обход товаров ----------
+
+function parseCards(html) {
   const $ = cheerio.load(html);
   const out = [];
 
@@ -412,65 +233,76 @@ function parseMarketCards(html) {
   return out;
 }
 
-async function crawlMarketplace() {
-  console.log('Обхожу маркетплейс…');
-  const sitemap = await fetchText(`${MARKET_BASE}/sitemap.xml`);
-  const categories = [...new Set([...sitemap.matchAll(/greenleaf\.online\?category=([a-z0-9\-]+)/g)].map((m) => m[1]))];
-  console.log(`  категорий в sitemap: ${categories.length}`);
+async function crawlCategory(id, label) {
+  const products = [];
+  for (let page = 1; page <= 90; page += 1) {
+    const url = `${MARKET}/?category=${id}&page=${page}`;
+    const html = await fetchText(url);
+    const cards = parseCards(html);
+    if (!cards.length) break;
+    cards.forEach((c) => products.push(c));
+    await sleep(180);
+  }
+  if (DEBUG) console.log(`    ${label}: ${products.length}`);
+  return products;
+}
 
-  const products = new Map();
-  let pages = 0;
+async function crawlAll(categories) {
+  if (USE_CACHE && fs.existsSync(CACHE)) {
+    const cached = JSON.parse(fs.readFileSync(CACHE, 'utf8'));
+    cached.forEach((p) => {
+      p.brand = brandOf(p.name);
+      p.volume = volumeOf(p.name);
+    });
+    console.log(`Товары из кеша: ${cached.length}`);
+    return cached;
+  }
 
-  for (const [i, cat] of categories.entries()) {
-    for (let page = 1; page <= 60; page += 1) {
-      const html = await fetchText(`${MARKET_BASE}/?category=${cat}&page=${page}`);
-      const cards = parseMarketCards(html);
-      pages += 1;
-      if (!cards.length) break;
+  console.log('Обхожу каталог…');
+  const collected = [];
 
-      let added = 0;
-      for (const c of cards) {
-        if (!products.has(c.article)) {
-          products.set(c.article, c);
-          added += 1;
-        }
-      }
-      if (!added) break;
-      await sleep(200);
+  // сначала подкатегории — чтобы товар получил самую точную категорию
+  for (const [i, group] of categories.groups.entries()) {
+    for (const sub of group.subs) {
+      const items = await crawlCategory(sub.id, `${group.name} / ${sub.name}`);
+      items.forEach((it) => collected.push({ ...it, parent: group.name, subcategory: sub.name }));
     }
-    if ((i + 1) % 10 === 0) {
-      console.log(`  ${i + 1}/${categories.length} категорий, товаров ${products.size}`);
+    if ((i + 1) % 3 === 0) console.log(`  ${i + 1}/${categories.groups.length} разделов, товаров ${collected.length}`);
+  }
+
+  // затем сами разделы — добираем всё остальное («Прочее»)
+  for (const group of categories.groups) {
+    const items = await crawlCategory(group.id, group.name);
+    items.forEach((it) => collected.push({ ...it, parent: group.name, subcategory: 'Прочее' }));
+  }
+
+  // дедуп: приоритет у записи с конкретной подкатегорией
+  const byArticle = new Map();
+  for (const item of collected) {
+    const existing = byArticle.get(item.article);
+    if (!existing) {
+      byArticle.set(item.article, item);
+      continue;
+    }
+    if (existing.subcategory === 'Прочее' && item.subcategory !== 'Прочее') {
+      byArticle.set(item.article, item);
     }
   }
 
-  console.log(`  страниц: ${pages}, уникальных артикулов: ${products.size}`);
-  return Object.fromEntries(products);
+  const result = [...byArticle.values()];
+  result.forEach((p) => {
+    p.brand = brandOf(p.name);
+    p.volume = volumeOf(p.name);
+  });
+  fs.writeFileSync(CACHE, JSON.stringify(result, null, 1));
+  console.log(`  всего товаров: ${result.length}`);
+
+  return result;
 }
 
-// ---------- 3. сборка ----------
+// ---------- описания ----------
 
-async function downloadImage(url, article) {
-  const fileName = article.replace(/[\\/:*?"<>|]/g, '-') + '.webp';
-  const dest = path.join(IMG_DIR, fileName);
-
-  if (!REFRESH_IMAGES && fs.existsSync(dest) && fs.statSync(dest).size > 500) {
-    return fileName;
-  }
-
-  const large = url.replace('/medium/', '/large/');
-  const res = await fetch(large, { headers: { 'User-Agent': UA } });
-  if (!res.ok) throw new Error(`HTTP ${res.status} для ${large}`);
-
-  const buf = Buffer.from(await res.arrayBuffer());
-  await sharp(buf)
-    .resize(700, 700, { fit: 'inside', withoutEnlargement: true })
-    .webp({ quality: 82 })
-    .toFile(dest);
-
-  return fileName;
-}
-
-async function fetchMarketDescription(url) {
+async function fetchDescription(url) {
   const html = await fetchText(url);
   const $ = cheerio.load(html);
 
@@ -480,26 +312,27 @@ async function fetchMarketDescription(url) {
   const container = heading.parent().clone();
   container.find('h2').first().remove();
 
-  const raw = (container.html() || '')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<\/li>/gi, '\n')
-    .replace(/<li[^>]*>/gi, '• ')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&quot;/g, '"')
-    .replace(/&laquo;/g, '«')
-    .replace(/&raquo;/g, '»')
-    .replace(/&mdash;/g, '—')
-    .replace(/&ndash;/g, '–')
-    .replace(/&[a-z]+;/g, ' ')
-    .replace(/[ \t]+/g, ' ');
+  container.find('style, script, noscript').remove();
 
-  return textToHtml(raw);
+  const raw = stripEntities(
+    (container.html() || '')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n\n')
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<li[^>]*>/gi, '• ')
+      .replace(/<[^>]+>/g, ''),
+  );
+
+  const clean = raw
+    .split(/\n\s*\n/)
+    .filter((block) => !/var\(--|calc\(|pointer-events|scroll-mb|tailwind|@media|\{\s*\}|theme\(/i.test(block))
+    .join('\n\n');
+
+  return textToHtml(clean);
 }
 
-// товары из исходной ручной таблицы — берём всегда, независимо от статуса
+// ---------- исходная таблица ----------
+
 function readLegacyTable() {
   if (!fs.existsSync(LEGACY_XLSX)) return [];
 
@@ -512,19 +345,38 @@ function readLegacyTable() {
     const article = cleanArticle(r['артикул']);
     const image = String(r['картинка'] ?? '').trim();
     if (!name || !article || !/^https?:/i.test(image)) continue;
-
     out.push({
       name,
       article,
       description: String(r['описание'] ?? ''),
       image,
-      category: String(r['категория'] ?? ''),
-      subcategory: String(r['подкатегория'] ?? ''),
+      category: String(r['категория'] ?? '').trim(),
+      subcategory: String(r['подкатегория'] ?? '').trim(),
     });
   }
 
   return out;
 }
+
+// ---------- картинки ----------
+
+async function downloadImage(url, article) {
+  const fileName = article.replace(/[\\/:*?"<>|]/g, '-') + '.webp';
+  const dest = path.join(IMG_DIR, fileName);
+
+  if (fs.existsSync(dest) && fs.statSync(dest).size > 500) return fileName;
+
+  const large = url.replace('/medium/', '/large/');
+  const res = await fetch(large, { headers: { 'User-Agent': UA } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+  const buf = Buffer.from(await res.arrayBuffer());
+  await sharp(buf).resize(700, 700, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 82 }).toFile(dest);
+
+  return fileName;
+}
+
+// ---------- база ----------
 
 function createSchema(db) {
   db.exec(`
@@ -552,8 +404,6 @@ function createSchema(db) {
   `);
 }
 
-const stripTags = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-
 function makeShort(html, title) {
   const plain = stripTags(html);
   if (!plain) return '';
@@ -567,138 +417,12 @@ function makeShort(html, title) {
 async function main() {
   fs.mkdirSync(IMG_DIR, { recursive: true });
 
-  const partnerProducts = await parsePartnerPage();
+  const categories = await parseCategories();
+  const market = await crawlAll(categories);
 
-  if (DRY) {
-    console.log('--- примеры разбора ---');
-    for (const p of partnerProducts.slice(0, 5)) {
-      console.log(JSON.stringify({ article: p.article, volume: p.volume, brand: p.brand, cat: p.category, sub: p.subcategory, desc: p.description.slice(0, 200) }, null, 1));
-    }
-    console.log('без объёма:', partnerProducts.filter((x) => !x.volume).length, 'из', partnerProducts.length);
-    console.log('без описания:', partnerProducts.filter((x) => !x.description).length);
-    console.log('без подкатегории:', partnerProducts.filter((x) => !x.subcategory).length);
-    return;
-  }
+  console.log(`\nТоваров на маркетплейсе: ${market.length}`);
 
-  let market;
-  if (USE_CACHE && fs.existsSync(CACHE)) {
-    market = JSON.parse(fs.readFileSync(CACHE, 'utf8'));
-    console.log(`Маркетплейс из кеша: ${Object.keys(market).length} артикулов`);
-  } else {
-    market = await crawlMarketplace();
-    fs.writeFileSync(CACHE, JSON.stringify(market, null, 1));
-    console.log(`Кеш маркетплейса: ${CACHE}`);
-  }
-
-  // ---- отбор: сопоставление по названию ----
-  const marketList = Object.values(market).map((m) => ({ ...m, tokens: normTokens(m.name) }));
-  const marketByArticle = market;
-
-  const seen = new Set();
-  const selected = [];
-  const rejected = { notFound: [], notAvailable: [], duplicate: [] };
-  const matches = new Map();
-
-  for (const p of partnerProducts) {
-    const m = findMatch(p, marketList, marketByArticle);
-    if (!m) {
-      rejected.notFound.push(p);
-      continue;
-    }
-
-    p.market = m;
-    p.marketArticle = m.article;
-    matches.set(p, m);
-
-    if (seen.has(m.article)) {
-      rejected.duplicate.push(p);
-      continue;
-    }
-    seen.add(m.article);
-
-    if (m.stock !== AVAILABLE) {
-      rejected.notAvailable.push({ ...p, stock: m.stock });
-      continue;
-    }
-    selected.push(p);
-  }
-
-  console.log('');
-  console.log('=== ОТБОР ===');
-  console.log(`  всего на странице: ${partnerProducts.length}`);
-  console.log(`  не найдено в маркетплейсе: ${rejected.notFound.length}`);
-  console.log(`  не «у партнёров»: ${rejected.notAvailable.length}`);
-  console.log(`  дубли: ${rejected.duplicate.length}`);
-  console.log(`  В КАТАЛОГ: ${selected.length}`);
-
-  if (DEBUG) {
-    console.log('\nне найдено (примеры):', rejected.notFound.slice(0, 15).map((p) => p.name.slice(0, 45)));
-  }
-
-  // ---- сортировка ----
-  const catRank = (c) => {
-    const i = CATEGORY_ORDER.indexOf(c);
-    return i === -1 ? CATEGORY_ORDER.length : i;
-  };
-  const subRank = (s) => {
-    const i = SUBCATEGORY_ORDER.indexOf(s);
-    return i === -1 ? SUBCATEGORY_ORDER.length : i;
-  };
-  selected.sort((a, b) => {
-    const c = catRank(a.category) - catRank(b.category);
-    if (c) return c;
-    const s = subRank(a.subcategory) - subRank(b.subcategory);
-    if (s) return s;
-    return a.name.localeCompare(b.name, 'ru');
-  });
-
-  // ---- товары из исходной таблицы ----
-  const legacyItems = readLegacyTable();
-  const usedArticles = new Set(selected.map((p) => p.marketArticle));
-  const selectedNames = selected.map((p) => normTokens(p.name));
-
-  let addedLegacy = 0;
-  for (const item of legacyItems) {
-    if (usedArticles.has(item.article)) continue;
-
-    const tokens = normTokens(item.name);
-    const clashes = selectedNames.some((set) => {
-      let shared = 0;
-      for (const t of tokens) if (set.has(t)) shared += 1;
-      return shared >= 3 && shared / Math.min(tokens.size, set.size) >= 0.8;
-    });
-    if (clashes) continue;
-
-    selected.push({
-      name: item.name,
-      article: item.article,
-      category: fixCategory(item.category),
-      subcategory: fixSubcategory(item.subcategory),
-      volume: '',
-      brand: '',
-      client: null,
-      partner: null,
-      coupon: '',
-      description: textToHtml(item.description),
-      marketDescription: '',
-      marketArticle: item.article,
-      legacy: true,
-      market: {
-        article: item.article,
-        name: item.name,
-        url: '',
-        price: '',
-        stock: 'legacy',
-        image: item.image,
-      },
-    });
-    usedArticles.add(item.article);
-    addedLegacy += 1;
-  }
-
-  console.log(`  добавлено из исходной таблицы: ${addedLegacy}`);
-
-  // ---- описания с маркетплейса ----
+  // ---- описания ----
   let descCache = {};
   if (fs.existsSync(DESC_CACHE)) {
     try {
@@ -708,106 +432,128 @@ async function main() {
     }
   }
 
-  console.log('\nТяну описания с маркетплейса…');
-  let fetched = 0;
-  let fromCache = 0;
-  let emptyDesc = 0;
+  console.log('\nОписания с карточек…');
+  let fetchedDesc = 0;
+  let cachedDesc = 0;
+  let doneDesc = 0;
 
-  for (const p of selected) {
-    if (!p.market.url) {
-      p.marketDescription = '';
-      continue;
+  const needDesc = market.filter((p) => {
+    const cached = !REFRESH_DESC ? descCache[p.article] : '';
+    if (cached) {
+      p.description = cached;
+      cachedDesc += 1;
+      return false;
     }
+    return true;
+  });
 
-    const key = p.marketArticle;
-    let desc = !REFRESH_DESC ? descCache[key] : '';
+  console.log(`  в кеше: ${cachedDesc}, надо скачать: ${needDesc.length}`);
 
-    if (desc === undefined || desc === null) desc = '';
-
-    if (!desc) {
-      try {
-        desc = await fetchMarketDescription(p.market.url);
-        fetched += 1;
-        if (!desc) emptyDesc += 1;
-      } catch (err) {
-        desc = '';
-        emptyDesc += 1;
-      }
-      descCache[key] = desc;
-      await sleep(120);
-      if (fetched % 25 === 0) console.log(`  ${fetched}/${selected.length}`);
-    } else {
-      fromCache += 1;
+  await pool(needDesc, 8, async (p) => {
+    try {
+      p.description = await fetchDescription(p.url);
+    } catch {
+      p.description = '';
     }
+    descCache[p.article] = p.description;
+    fetchedDesc += 1;
+    doneDesc += 1;
+    if (doneDesc % 100 === 0) {
+      console.log(`  скачано ${doneDesc}/${needDesc.length}`);
+      fs.writeFileSync(DESC_CACHE, JSON.stringify(descCache, null, 1));
+    }
+  });
 
-    p.marketDescription = desc;
-  }
+  for (const p of market) if (p.description === undefined) p.description = '';
 
   fs.writeFileSync(DESC_CACHE, JSON.stringify(descCache, null, 1));
-  console.log(`  скачано: ${fetched}, из кеша: ${fromCache}, без описания: ${emptyDesc}`);
+  console.log(`  скачано: ${fetchedDesc}, из кеша: ${cachedDesc}`);
 
-  // ---- картинки: имя файла = артикул маркетплейса ----
-  console.log('\nКачаю картинки…');
+  // ---- товары из исходной таблицы ----
+  const legacy = readLegacyTable();
+  const used = new Set(market.map((p) => p.article));
+  let addedLegacy = 0;
+
+  for (const item of legacy) {
+    if (used.has(item.article)) continue;
+    market.push({
+      article: item.article,
+      name: item.name,
+      image: item.image,
+      price: '',
+      stock: 'legacy',
+      url: '',
+      parent: item.category || 'Ассортимент',
+      subcategory: item.subcategory || 'Разное',
+      description: textToHtml(item.description),
+      legacy: true,
+    });
+    used.add(item.article);
+    addedLegacy += 1;
+  }
+  console.log(`  добавлено из исходной таблицы: ${addedLegacy}`);
+
+  // ---- порядок категорий ----
+  const parentOrder = categories.groups.map((p) => p.name);
+  const rank = (name) => {
+    const i = parentOrder.indexOf(name);
+    return i === -1 ? parentOrder.length : i;
+  };
+
+  market.sort((a, b) => {
+    const p = rank(a.parent) - rank(b.parent);
+    if (p) return p;
+    if (a.parent === b.parent) {
+      const s = String(a.subcategory).localeCompare(String(b.subcategory), 'ru');
+      if (s) return s;
+    }
+    return a.name.localeCompare(b.name, 'ru');
+  });
+
+  // ---- картинки ----
+  console.log('\nКартинки…');
   let downloaded = 0;
   let failed = 0;
-  for (const p of selected) {
+  let doneImg = 0;
+
+  await pool(market, 8, async (p) => {
     try {
-      const file = await downloadImage(p.market.image, p.marketArticle);
+      const file = await downloadImage(p.image, p.article);
       p.imageFile = '/images/catalog/' + file;
       downloaded += 1;
-      if (downloaded % 25 === 0) console.log(`  ${downloaded}/${selected.length}`);
-    } catch (err) {
+    } catch {
       p.imageFile = '/logo.svg';
       failed += 1;
-      console.error(`  ! ${p.marketArticle}: ${err.message}`);
     }
-    await sleep(90);
-  }
-  console.log(`  скачано: ${downloaded}, ошибок: ${failed}`);
-
-  // ---- Excel: все товары партнёрской страницы ----
-  const selectedSet = new Set(selected);
-
-  const rows = partnerProducts.map((p, i) => {
-    const m = p.market || null;
-    const inCatalog = selectedSet.has(p);
-    const file = m && inCatalog ? `/images/catalog/${m.article.replace(/[\\/:*?"<>|]/g, '-')}.webp` : '';
-
-    return {
-      '№': i + 1,
-      'Категория': p.category,
-      'Подкатегория': p.subcategory,
-      'Артикул (сайт)': p.article || '',
-      'Артикул маркетплейса': m ? m.article : '',
-      'Совпадение': m ? m.score : '',
-      'Название': p.name,
-      'Название на маркетплейсе': m ? m.name : '',
-      'Объём': p.volume,
-      'Бренд': p.brand,
-      'Описание': stripTags(p.market && p.marketDescription ? p.marketDescription : p.description),
-      'Источник описания': p.market && p.marketDescription ? 'маркетплейс' : p.description ? 'сайт партнёра' : 'нет',
-      'Цена клиента': p.client ?? '',
-      'Цена партнёра': p.partner ?? '',
-      'Купон': p.coupon,
-      'Цена маркетплейса': m ? m.price : '',
-      'Наличие': m ? m.stock : 'Не найден в маркетплейсе',
-      'В каталоге': inCatalog ? 'да' : 'нет',
-      'Ссылка на товар': m ? m.url : '',
-      'Файл картинки': file,
-    };
+    doneImg += 1;
+    if (doneImg % 200 === 0) console.log(`  ${doneImg}/${market.length}`);
   });
+
+  console.log(`  обработано: ${downloaded}, ошибок: ${failed}`);
+
+  // ---- Excel ----
+  const rows = market.map((p, i) => ({
+    '№': i + 1,
+    'Категория': p.parent,
+    'Подкатегория': p.subcategory,
+    'Артикул': p.article,
+    'Название': p.name,
+    'Описание': stripTags(p.description),
+    'Наличие': p.stock,
+    'Цена маркетплейса': p.price,
+    'Ссылка на товар': p.url,
+    'Файл картинки': p.imageFile,
+  }));
 
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [
-    { wch: 4 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 16 }, { wch: 9 },
-    { wch: 45 }, { wch: 45 }, { wch: 10 }, { wch: 12 }, { wch: 80 }, { wch: 18 },
-    { wch: 9 }, { wch: 10 }, { wch: 12 }, { wch: 16 }, { wch: 22 },
-    { wch: 8 }, { wch: 45 }, { wch: 30 },
+    { wch: 4 }, { wch: 22 }, { wch: 22 }, { wch: 12 }, { wch: 55 }, { wch: 80 },
+    { wch: 26 }, { wch: 16 }, { wch: 50 }, { wch: 30 },
   ];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Товары');
   XLSX.writeFile(wb, XLSX_OUT);
-  console.log(`\nExcel: ${XLSX_OUT} (${rows.length} строк)`);
+  console.log(`\nExcel: ${rows.length} строк`);
 
   // ---- база ----
   const db = new Database(DB_PATH);
@@ -819,52 +565,48 @@ async function main() {
        volume, brand, price_client, price_partner, coupon, price_market, stock, url, featured, sort_order)
     VALUES
       (@article, @title, @description, @short, @category, @subcategory, @images,
-       @volume, @brand, @price_client, @price_partner, @coupon, @price_market, @stock, @url, 0, @sort_order)
+       @volume, @brand, NULL, NULL, '', @price_market, @stock, @url, 0, @sort_order)
   `);
 
   db.transaction((list) => {
     list.forEach((p, i) => {
       insert.run({
-        article: p.marketArticle,
+        article: p.article,
         title: p.name,
-        description: p.marketDescription || p.description,
-        short: makeShort(p.marketDescription || p.description, p.name),
-        category: p.category,
+        description: p.description || '',
+        short: makeShort(p.description, p.name),
+        category: p.parent,
         subcategory: p.subcategory,
-        images: JSON.stringify([p.imageFile]),
-        volume: p.volume,
-        brand: p.brand,
-        price_client: p.client,
-        price_partner: p.partner,
-        coupon: p.coupon,
-        price_market: p.market.price,
-        stock: p.market.stock,
-        url: p.market.url,
+        images: JSON.stringify([p.imageFile || '/logo.svg']),
+        volume: p.volume || '',
+        brand: p.brand || '',
+        price_market: p.price || '',
+        stock: p.stock || '',
+        url: p.url || '',
         sort_order: i,
       });
     });
-  })(selected);
+  })(market);
 
   const total = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
   const groups = db
-    .prepare('SELECT category, subcategory, COUNT(*) AS n FROM products GROUP BY category, subcategory ORDER BY MIN(sort_order)')
+    .prepare('SELECT category, COUNT(*) AS n FROM products GROUP BY category ORDER BY MIN(sort_order)')
     .all();
-
   db.close();
 
-  // ---- чистка картинок, на которые больше нет ссылок ----
-  const used = new Set(selected.map((p) => path.basename(p.imageFile || '')));
+  // ---- чистка неиспользуемых картинок ----
+  const usedFiles = new Set(market.map((p) => path.basename(p.imageFile || '')));
   let removed = 0;
   for (const file of fs.readdirSync(IMG_DIR)) {
-    if (!used.has(file)) {
+    if (!usedFiles.has(file)) {
       fs.unlinkSync(path.join(IMG_DIR, file));
       removed += 1;
     }
   }
 
   console.log(`\nВ базе: ${total}`);
-  for (const g of groups) console.log(`  ${g.category} / ${g.subcategory}: ${g.n}`);
-  console.log(`\nУдалено неиспользуемых картинок: ${removed}`);
+  for (const g of groups) console.log(`  ${g.category}: ${g.n}`);
+  console.log(`Удалено неиспользуемых картинок: ${removed}`);
 }
 
 main().catch((err) => {

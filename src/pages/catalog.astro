@@ -1,53 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
-import Database from 'better-sqlite3';
-import path from 'path';
-
-const db = new Database(path.join(process.cwd(), 'data', 'catalog.db'), { readonly: true });
-const allProducts = db.prepare('SELECT * FROM products ORDER BY sort_order, id').all();
-
-const products = allProducts.map((p) => ({
-  ...p,
-  images: JSON.parse(p.images),
-}));
-
-const categories = ['Все', ...new Set(products.map((p) => p.category))];
-const subcategories = ['Все', ...new Set(products.map((p) => p.subcategory))];
-const brands = ['Все', ...new Set(products.map((p) => p.brand).filter(Boolean).sort((a, b) => a.localeCompare(b, 'ru')))];
-
-// пастельные цвета подкатегорий — в тон палитре сайта
-const TAG_PALETTE = [
-  { bg: '#E8F5EC', fg: '#1E6D3A' }, // мята
-  { bg: '#FBEDE4', fg: '#8A4B2A' }, // персик
-  { bg: '#EEEAF7', fg: '#4B3A73' }, // лаванда
-  { bg: '#E6F1F8', fg: '#22536B' }, // небесный
-  { bg: '#F8F1E2', fg: '#6B5326' }, // песок
-  { bg: '#FBEAEE', fg: '#7A2F43' }, // роза
-  { bg: '#E4F4F2', fg: '#1F5F58' }, // аква
-  { bg: '#EFF5E0', fg: '#4C6A24' }, // фисташка
-  { bg: '#ECEEFA', fg: '#3C3F78' }, // перивинкль
-  { bg: '#F4EAF3', fg: '#6A3A64' }, // мокко
-  { bg: '#F0F2E3', fg: '#555E2B' }, // олива
-  { bg: '#FDEDE7', fg: '#8A4130' }, // коралл
-  { bg: '#E9F0F7', fg: '#2C5170' }, // пудрово-голубой
-  { bg: '#FBF6E4', fg: '#6E5A22' }, // крем
-  { bg: '#F3E9F0', fg: '#5E3552' }, // слива
-  { bg: '#EAF2E1', fg: '#3F6B2E' }, // шалфей
-  { bg: '#FBEFE9', fg: '#7A4630' }, // терракота
-  { bg: '#F7F0F4', fg: '#6B3A56' }, // лавандово-розовый
-  { bg: '#E7F3F0', fg: '#1D5C56' }, // тил
-  { bg: '#F6F3EA', fg: '#5F5533' }, // лён
-  { bg: '#EFF2F8', fg: '#33436B' }, // туман
-  { bg: '#F9F0E9', fg: '#74492F' }, // карамель
-];
-
-const tagColor = new Map(
-  subcategories.filter((c) => c !== 'Все').map((c, i) => [c, TAG_PALETTE[i % TAG_PALETTE.length]]),
-);
 ---
 <Base
   title="Каталог продукции — Greenleaf в Геленджике"
-  description="Каталог продукции Greenleaf: уход за кожей лица, основной и комплексный уход, маски. Оформление заказа через партнёра в Геленджике."
+  description="Полный каталог продукции Greenleaf: уход за кожей, волосами и телом, гигиена, здоровье, товары для дома и детей. Оформление заказа через партнёра в Геленджике."
 >
   <section class="catalog-section">
     <div class="container">
@@ -78,58 +34,27 @@ const tagColor = new Map(
             </div>
 
             <div class="filter-block">
-            <h2 class="filter-title">Категория</h2>
-            <div class="filters" id="catFilters">
-              {categories.map((c) => (
-                <button
-                  type="button"
-                  class="filter-btn"
-                  class:list={[{ active: c === 'Все' }]}
-                  data-type="category"
-                  data-value={c}
-                >{c}</button>
-              ))}
+              <h2 class="filter-title">Категория</h2>
+              <div class="filters" id="catFilters"></div>
             </div>
-          </div>
 
-          <div class="filter-block">
-            <h2 class="filter-title">Подкатегория</h2>
-            <div class="filters" id="subcatFilters">
-              {subcategories.map((c) => (
-                <button
-                  type="button"
-                  class="filter-btn"
-                  class:list={[{ active: c === 'Все' }]}
-                  data-type="subcategory"
-                  data-value={c}
-                  style={c !== 'Все' ? `--tag-bg:${tagColor.get(c).bg}` : undefined}
-                >{c}</button>
-              ))}
+            <div class="filter-block">
+              <h2 class="filter-title">Подкатегория</h2>
+              <div class="filters" id="subcatFilters"></div>
             </div>
-          </div>
 
-          <div class="filter-block">
-            <h2 class="filter-title">Бренд</h2>
-            <div class="filters" id="brandFilters">
-              {brands.map((c) => (
-                <button
-                  type="button"
-                  class="filter-btn"
-                  class:list={[{ active: c === 'Все' }]}
-                  data-type="brand"
-                  data-value={c}
-                >{c}</button>
-              ))}
+            <div class="filter-block">
+              <h2 class="filter-title">Бренд</h2>
+              <div class="filters" id="brandFilters"></div>
             </div>
-          </div>
 
-          <button type="button" class="filter-reset" id="resetFilters">Сбросить фильтры</button>
+            <button type="button" class="filter-reset" id="resetFilters">Сбросить фильтры</button>
           </div>
         </aside>
 
         <div class="catalog-main">
           <div class="catalog-toolbar">
-            <span class="catalog-count" id="catalogCount">{products.length} товаров</span>
+            <span class="catalog-count" id="catalogCount">Загрузка…</span>
             <label class="sort-label">
               <span>Сортировка:</span>
               <select id="sortSelect">
@@ -140,43 +65,18 @@ const tagColor = new Map(
             </label>
           </div>
 
-          <div class="grid-products" id="productsGrid">
-            {products.map((p) => (
-              <article
-                class="product-card"
-                data-category={p.category}
-                data-subcategory={p.subcategory}
-                data-title={p.title}
-                data-id={p.id}
-                data-article={p.article}
-                data-volume={p.volume}
-                data-brand={p.brand}
-                data-image={p.images[0] || '/logo.svg'}
-                data-search={[p.title, p.article, p.brand, p.subcategory, p.category].join(' ').toLowerCase()}
-                data-tag-bg={tagColor.get(p.subcategory)?.bg}
-                data-tag-fg={tagColor.get(p.subcategory)?.fg}
-              >
-                <div class="product-image">
-                  <img src={p.images[0] || '/logo.svg'} alt={p.title} loading="lazy" onerror="this.src='/logo.svg'" />
-                </div>
-                <div class="product-info">
-                  <span
-                    class="category-tag"
-                    style={`--tag-bg:${tagColor.get(p.subcategory)?.bg};--tag-fg:${tagColor.get(p.subcategory)?.fg}`}
-                  >{p.subcategory}</span>
-                  <h3>{p.title}</h3>
-                  {p.short && <p class="short">{p.short}</p>}
-                  <div class="product-footer">
-                    <button type="button" class="btn btn-outline details-btn" data-id={p.id}>Подробнее</button>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
+          <div class="grid-products" id="productsGrid"></div>
 
           <nav class="pagination" id="pagination" aria-label="Страницы каталога" hidden></nav>
 
           <p class="empty-state" id="emptyState" hidden>Ничего не нашлось. Измените запрос или сбросьте фильтры.</p>
+
+          <noscript>
+            <p class="empty-state">
+              Для работы каталога нужен JavaScript. Список категорий: уходовая косметика, гигиена, товары для дома,
+              здоровье, товары для детей. Связаться со мной можно на странице контактов.
+            </p>
+          </noscript>
         </div>
       </div>
     </div>
@@ -201,54 +101,136 @@ const tagColor = new Map(
     </div>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
+  <script is:inline>
+    (() => {
+      const PER_PAGE = 24;
+
+      const PALETTE = [
+        ['#E8F5EC', '#1E6D3A'], ['#FBEDE4', '#8A4B2A'], ['#EEEAF7', '#4B3A73'],
+        ['#E6F1F8', '#22536B'], ['#F8F1E2', '#6B5326'], ['#FBEAEE', '#7A2F43'],
+        ['#E4F4F2', '#1F5F58'], ['#EFF5E0', '#4C6A24'], ['#ECEEFA', '#3C3F78'],
+        ['#F4EAF3', '#6A3A64'], ['#F0F2E3', '#555E2B'], ['#FDEDE7', '#8A4130'],
+        ['#E9F0F7', '#2C5170'], ['#FBF6E4', '#6E5A22'], ['#F3E9F0', '#5E3552'],
+        ['#EAF2E1', '#3F6B2E'], ['#FBEFE9', '#7A4630'], ['#F7F0F4', '#6B3A56'],
+        ['#E7F3F0', '#1D5C56'], ['#F6F3EA', '#5F5533'], ['#EFF2F8', '#33436B'],
+        ['#F9F0E9', '#74492F'],
+      ];
+
+      const colorOf = (str) => {
+        let h = 0;
+        for (let i = 0; i < str.length; i += 1) h = (h * 31 + str.charCodeAt(i)) % 997;
+        return PALETTE[h % PALETTE.length];
+      };
+
+      const esc = (s) =>
+        String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+      const plural = (n) => {
+        const a = Math.abs(n) % 100;
+        const b = a % 10;
+        if (a > 10 && a < 20) return 'товаров';
+        if (b === 1) return 'товар';
+        if (b >= 2 && b <= 4) return 'товара';
+        return 'товаров';
+      };
+
+      const state = { cat: 'Все', sub: 'Все', brand: 'Все', q: '', sort: 'default', page: 1 };
+      let DATA = { products: [], categories: [], brands: [] };
+      let descriptions = null;
+
       const grid = document.getElementById('productsGrid');
-      const cards = Array.from(grid.querySelectorAll('.product-card'));
-      const catBtns = Array.from(document.querySelectorAll('#catFilters .filter-btn'));
-      const subcatBtns = Array.from(document.querySelectorAll('#subcatFilters .filter-btn'));
-      const resetBtn = document.getElementById('resetFilters');
-      const sortSelect = document.getElementById('sortSelect');
       const countEl = document.getElementById('catalogCount');
       const emptyEl = document.getElementById('emptyState');
+      const pagination = document.getElementById('pagination');
+      const sortSelect = document.getElementById('sortSelect');
+      const searchInput = document.getElementById('searchInput');
       const sidebar = document.getElementById('catalogSidebar');
       const filtersToggle = document.getElementById('filtersToggle');
       const filtersCount = document.getElementById('filtersCount');
-      const pagination = document.getElementById('pagination');
+      const resetBtn = document.getElementById('resetFilters');
+
+      const catBox = document.getElementById('catFilters');
+      const subcatBox = document.getElementById('subcatFilters');
+      const brandBox = document.getElementById('brandFilters');
 
       filtersToggle.addEventListener('click', () => {
         const open = sidebar.classList.toggle('open');
         filtersToggle.setAttribute('aria-expanded', String(open));
       });
 
-      const brandBtns = Array.from(document.querySelectorAll('#brandFilters .filter-btn'));
-      const searchInput = document.getElementById('searchInput');
-
-      const state = { cat: 'Все', sub: 'Все', brand: 'Все', q: '', sort: 'default', page: 1 };
-      const PER_PAGE = 24;
-
-      const ordered = () => Array.from(grid.querySelectorAll('.product-card'));
-
-      const plural = (n, one, few, many) => {
-        const a = Math.abs(n) % 100;
-        const b = a % 10;
-        if (a > 10 && a < 20) return many;
-        if (b === 1) return one;
-        if (b >= 2 && b <= 4) return few;
-        return many;
+      const makeBtn = (value, style) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'filter-btn';
+        b.dataset.value = value;
+        b.textContent = value;
+        if (style) b.setAttribute('style', style);
+        return b;
       };
 
-      const field = (card, dim) =>
-        dim === 'cat' ? card.dataset.category
-          : dim === 'sub' ? card.dataset.subcategory
-            : card.dataset.brand;
+      const renderFilterButtons = (box, values, key, colored) => {
+        box.innerHTML = '';
+        values.forEach((v) => {
+          const style = colored && v !== 'Все' ? `--tag-bg:${colorOf(v)[0]}` : '';
+          const btn = makeBtn(v, style);
+          if (state[key] === v) btn.classList.add('active');
+          btn.addEventListener('click', () => {
+            state[key] = v;
+            state.page = 1;
+            syncAvailability();
+            render();
+          });
+          box.appendChild(btn);
+        });
+      };
 
-      const matches = (card) => {
-        if (state.cat !== 'Все' && card.dataset.category !== state.cat) return false;
-        if (state.sub !== 'Все' && card.dataset.subcategory !== state.sub) return false;
-        if (state.brand !== 'Все' && card.dataset.brand !== state.brand) return false;
-        if (state.q && !(card.dataset.search || '').includes(state.q)) return false;
-        return true;
+      const currentSubs = () => {
+        if (state.cat === 'Все') {
+          const all = new Set();
+          DATA.products.forEach((p) => all.add(p.sub));
+          return ['Все', ...[...all]];
+        }
+        const cat = DATA.categories.find((c) => c.name === state.cat);
+        return cat ? ['Все', ...cat.subs] : ['Все'];
+      };
+
+      const visibleProducts = () =>
+        DATA.products.filter(
+          (p) =>
+            (state.cat === 'Все' || p.cat === state.cat) &&
+            (state.sub === 'Все' || p.sub === state.sub) &&
+            (state.brand === 'Все' || p.brand === state.brand) &&
+            (!state.q || p.search.includes(state.q)),
+        );
+
+      const syncAvailability = () => {
+        const subs = currentSubs();
+        if (!subs.includes(state.sub)) state.sub = 'Все';
+
+        const filtered = visibleProducts();
+        const brands = new Set(filtered.map((p) => p.brand).filter(Boolean));
+        if (state.brand !== 'Все' && !brands.has(state.brand)) state.brand = 'Все';
+
+        renderFilterButtons(catBox, ['Все', ...DATA.categories.map((c) => c.name)], 'cat');
+        renderFilterButtons(subcatBox, subs, 'sub', true);
+        renderFilterButtons(brandBox, ['Все', ...DATA.brands.filter((b) => brands.has(b))], 'brand');
+      };
+
+      const cardHtml = (p) => {
+        const [bg, fg] = colorOf(p.sub);
+        return `<article class="product-card" data-id="${p.id}">
+          <div class="product-image">
+            <img src="${esc(p.img)}" alt="${esc(p.title)}" loading="lazy" />
+          </div>
+          <div class="product-info">
+            <span class="category-tag" style="--tag-bg:${bg};--tag-fg:${fg}">${esc(p.sub)}</span>
+            <h3>${esc(p.title)}</h3>
+            ${p.short ? `<p class="short">${esc(p.short)}</p>` : ''}
+            <div class="product-footer">
+              <button type="button" class="btn btn-outline details-btn" data-id="${p.id}">Подробнее</button>
+            </div>
+          </div>
+        </article>`;
       };
 
       const renderPagination = (pages) => {
@@ -256,7 +238,7 @@ const tagColor = new Map(
         pagination.hidden = pages <= 1;
         if (pages <= 1) return;
 
-        const makeBtn = (label, page, opts = {}) => {
+        const btn = (label, page, opts = {}) => {
           const b = document.createElement('button');
           b.type = 'button';
           b.className = 'page-btn' + (opts.nav ? ' nav' : '') + (opts.active ? ' active' : '');
@@ -267,162 +249,65 @@ const tagColor = new Map(
           } else {
             b.addEventListener('click', () => {
               state.page = page;
-              apply();
+              render();
               grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
           }
           return b;
         };
 
-        pagination.appendChild(makeBtn('←', state.page - 1, { disabled: state.page === 1, nav: true }));
+        pagination.appendChild(btn('←', state.page - 1, { disabled: state.page === 1, nav: true }));
 
-        const nums = [...new Set([1, pages, state.page - 1, state.page, state.page + 1])]
+        const nums = [...new Set([1, pages, state.page - 2, state.page - 1, state.page, state.page + 1, state.page + 2])]
           .filter((n) => n >= 1 && n <= pages)
           .sort((a, b) => a - b);
 
         let prev = 0;
-        for (const n of nums) {
+        nums.forEach((n) => {
           if (n - prev > 1) {
             const dots = document.createElement('span');
             dots.className = 'page-dots';
             dots.textContent = '…';
             pagination.appendChild(dots);
           }
-          pagination.appendChild(makeBtn(String(n), n, { active: n === state.page }));
+          pagination.appendChild(btn(String(n), n, { active: n === state.page }));
           prev = n;
-        }
+        });
 
-        pagination.appendChild(makeBtn('→', state.page + 1, { disabled: state.page === pages, nav: true }));
+        pagination.appendChild(btn('→', state.page + 1, { disabled: state.page === pages, nav: true }));
       };
 
-      const apply = () => {
-        const list = ordered().filter(matches);
+      const render = () => {
+        const list = visibleProducts().slice().sort((a, b) => {
+          if (state.sort === 'name-asc') return a.title.localeCompare(b.title, 'ru');
+          if (state.sort === 'name-desc') return b.title.localeCompare(a.title, 'ru');
+          return a.order - b.order;
+        });
+
         const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
         if (state.page > pages) state.page = pages;
 
         const start = (state.page - 1) * PER_PAGE;
-        const onPage = new Set(list.slice(start, start + PER_PAGE));
+        grid.innerHTML = list.slice(start, start + PER_PAGE).map(cardHtml).join('');
 
-        cards.forEach((card) => {
-          card.hidden = !onPage.has(card);
-        });
-
-        countEl.textContent = `${list.length} ${plural(list.length, 'товар', 'товара', 'товаров')}`;
+        countEl.textContent = `${list.length} ${plural(list.length)}`;
         emptyEl.hidden = list.length !== 0;
         renderPagination(pages);
 
-        const activeFilters =
-          (state.cat !== 'Все' ? 1 : 0) +
-          (state.sub !== 'Все' ? 1 : 0) +
-          (state.brand !== 'Все' ? 1 : 0) +
-          (state.q ? 1 : 0);
-        filtersCount.textContent = String(activeFilters);
-        filtersCount.hidden = activeFilters === 0;
+        const active = (state.cat !== 'Все' ? 1 : 0) + (state.sub !== 'Все' ? 1 : 0) +
+          (state.brand !== 'Все' ? 1 : 0) + (state.q ? 1 : 0);
+        filtersCount.textContent = String(active);
+        filtersCount.hidden = active === 0;
       };
 
-      const sortCards = () => {
-        if (state.sort === 'default') {
-          cards
-            .slice()
-            .sort((a, b) => Number(a.dataset.order) - Number(b.dataset.order))
-            .forEach((card) => grid.appendChild(card));
-          return;
+      const loadDescriptions = () => {
+        if (!descriptions) {
+          descriptions = fetch('/catalog/descriptions.json')
+            .then((r) => (r.ok ? r.json() : {}))
+            .catch(() => ({}));
         }
-
-        const dir = state.sort === 'name-asc' ? 1 : -1;
-        cards
-          .slice()
-          .sort((a, b) => dir * a.dataset.title.localeCompare(b.dataset.title, 'ru'))
-          .forEach((card) => grid.appendChild(card));
+        return descriptions;
       };
-
-      const BTNS = { cat: catBtns, sub: subcatBtns, brand: brandBtns };
-
-      const setActive = (btns, value) =>
-        btns.forEach((b) => b.classList.toggle('active', b.dataset.value === value));
-
-      // какие значения встречаются у товаров при остальных выбранных фильтрах
-      const allowedValues = (dim) => {
-        const set = new Set();
-        ordered().forEach((card) => {
-          if (dim !== 'cat' && state.cat !== 'Все' && card.dataset.category !== state.cat) return;
-          if (dim !== 'sub' && state.sub !== 'Все' && card.dataset.subcategory !== state.sub) return;
-          if (dim !== 'brand' && state.brand !== 'Все' && card.dataset.brand !== state.brand) return;
-          const v = field(card, dim);
-          if (v) set.add(v);
-        });
-        return set;
-      };
-
-      const syncAvailability = () => {
-        ['cat', 'sub', 'brand'].forEach((dim) => {
-          const allowed = allowedValues(dim);
-          BTNS[dim].forEach((btn) => {
-            btn.hidden = !(btn.dataset.value === 'Все' || allowed.has(btn.dataset.value));
-          });
-          if (state[dim] !== 'Все' && !allowed.has(state[dim])) {
-            state[dim] = 'Все';
-            setActive(BTNS[dim], 'Все');
-          }
-        });
-      };
-
-      const bindFilter = (btns, key) => {
-        btns.forEach((btn) => {
-          btn.addEventListener('click', () => {
-            setActive(btns, btn.dataset.value);
-            state[key] = btn.dataset.value;
-            state.page = 1;
-            syncAvailability();
-            apply();
-          });
-        });
-      };
-
-      bindFilter(catBtns, 'cat');
-      bindFilter(subcatBtns, 'sub');
-      bindFilter(brandBtns, 'brand');
-
-      let searchTimer = null;
-      searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(() => {
-          state.q = searchInput.value.trim().toLowerCase();
-          state.page = 1;
-          apply();
-        }, 150);
-      });
-
-      resetBtn.addEventListener('click', () => {
-        state.cat = 'Все';
-        state.sub = 'Все';
-        state.brand = 'Все';
-        state.q = '';
-        state.sort = 'default';
-        state.page = 1;
-        searchInput.value = '';
-        sortSelect.value = 'default';
-        Object.values(BTNS).forEach((btns) => {
-          btns.forEach((b, i) => {
-            b.classList.toggle('active', i === 0);
-            b.hidden = false;
-          });
-        });
-        sortCards();
-        apply();
-      });
-
-      sortSelect.addEventListener('change', () => {
-        state.sort = sortSelect.value;
-        state.page = 1;
-        sortCards();
-        apply();
-      });
-
-      // исходный порядок для сортировки «как в каталоге»
-      cards.forEach((card, i) => {
-        card.dataset.order = String(i);
-      });
 
       // ---- попап ----
       const modal = document.getElementById('productModal');
@@ -433,35 +318,28 @@ const tagColor = new Map(
       const modalCategory = document.getElementById('modalCategory');
       const modalMeta = document.getElementById('modalMeta');
 
-      let descriptionsPromise = null;
-      const loadDescriptions = () => {
-        if (!descriptionsPromise) {
-          descriptionsPromise = fetch('/catalog/data.json')
-            .then((r) => (r.ok ? r.json() : {}))
-            .catch(() => ({}));
-        }
-        return descriptionsPromise;
-      };
+      grid.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.details-btn');
+        if (!btn) return;
 
-      document.querySelectorAll('.details-btn').forEach((btn) => {
-        btn.addEventListener('click', async (e) => {
-          const card = e.currentTarget.closest('.product-card');
-          if (!card) return;
+        const id = Number(btn.dataset.id);
+        const p = DATA.products.find((x) => x.id === id);
+        if (!p) return;
 
-          modalImg.src = card.dataset.image || '/logo.svg';
-          modalImg.onerror = function () { this.src = '/logo.svg'; };
-          modalTitle.textContent = card.dataset.title || '';
-          modalCategory.textContent = card.dataset.subcategory || '';
-          modalCategory.style.background = card.dataset.tagBg || '';
-          modalCategory.style.color = card.dataset.tagFg || '';
-          modalMeta.textContent = [card.dataset.volume, card.dataset.brand].filter(Boolean).join(' · ');
-          modalDesc.innerHTML = '<p class="modal-loading">Загружаю описание…</p>';
-          modal.classList.add('active');
-          document.body.style.overflow = 'hidden';
+        const [bg, fg] = colorOf(p.sub);
+        modalImg.src = p.img;
+        modalImg.onerror = function () { this.src = '/logo.svg'; };
+        modalTitle.textContent = p.title;
+        modalCategory.textContent = p.sub;
+        modalCategory.style.background = bg;
+        modalCategory.style.color = fg;
+        modalMeta.textContent = [p.vol, p.brand, p.article ? `арт. ${p.article}` : ''].filter(Boolean).join(' · ');
+        modalDesc.innerHTML = '<p class="modal-loading">Загружаю описание…</p>';
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
 
-          const descriptions = await loadDescriptions();
-          modalDesc.innerHTML = descriptions[String(card.dataset.id)] || '';
-        });
+        const all = await loadDescriptions();
+        modalDesc.innerHTML = all[String(p.id)] || '<p>Описание скоро появится.</p>';
       });
 
       const close = () => {
@@ -477,12 +355,57 @@ const tagColor = new Map(
         if (e.key === 'Escape' && modal.classList.contains('active')) close();
       });
 
-      apply();
-    });
+      // ---- фильтры ----
+      let searchTimer = null;
+      searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+          state.q = searchInput.value.trim().toLowerCase();
+          state.page = 1;
+          syncAvailability();
+          render();
+        }, 150);
+      });
+
+      sortSelect.addEventListener('change', () => {
+        state.sort = sortSelect.value;
+        state.page = 1;
+        render();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        state.cat = 'Все';
+        state.sub = 'Все';
+        state.brand = 'Все';
+        state.q = '';
+        state.sort = 'default';
+        state.page = 1;
+        searchInput.value = '';
+        sortSelect.value = 'default';
+        syncAvailability();
+        render();
+      });
+
+      // ---- загрузка ----
+      fetch('/catalog/data.json')
+        .then((r) => r.json())
+        .then((data) => {
+          data.products.forEach((p, i) => {
+            p.order = i;
+            p.search = `${p.title} ${p.article} ${p.brand} ${p.sub} ${p.cat}`.toLowerCase();
+          });
+          DATA = data;
+          syncAvailability();
+          render();
+        })
+        .catch(() => {
+          countEl.textContent = 'Не удалось загрузить каталог';
+        });
+    })();
   </script>
 </Base>
 
-<style>
+<style is:global>
   .catalog-section { padding: 50px 0 80px; background: var(--bg-body); min-height: 80vh; }
   h1 { text-align: center; margin-bottom: 10px; }
   .lead { text-align: center; color: var(--text-muted); margin-bottom: 36px; }
@@ -494,19 +417,20 @@ const tagColor = new Map(
     align-items: start;
   }
 
-  /* ---------- сайдбар ---------- */
   .catalog-sidebar {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     padding: 18px 16px 20px;
     position: sticky;
     top: 92px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
   }
 
   .filters-toggle { display: none; }
   .filters-body { display: block; }
 
-  .filter-block + .filter-block { margin-top: 22px; }
+  .filter-block + .filter-block { margin-top: 20px; }
 
   .filter-title {
     font-size: 0.78rem;
@@ -523,12 +447,12 @@ const tagColor = new Map(
     display: block;
     width: 100%;
     text-align: left;
-    padding: 8px 10px;
+    padding: 7px 10px;
     background: transparent;
     border: 0;
     border-left: 3px solid transparent;
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 500;
     color: var(--text);
     cursor: pointer;
@@ -545,7 +469,7 @@ const tagColor = new Map(
   }
 
   .filter-reset {
-    margin-top: 22px;
+    margin-top: 20px;
     width: 100%;
     padding: 9px 12px;
     background: transparent;
@@ -554,12 +478,21 @@ const tagColor = new Map(
     font-size: 0.85rem;
     color: var(--text-muted);
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
   }
 
   .filter-reset:hover { border-color: var(--brand-green); color: var(--brand-green); }
 
-  /* ---------- тулбар ---------- */
+  .search-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .search-input:focus { outline: none; border-color: var(--brand-green); }
+
   .catalog-toolbar {
     display: flex;
     align-items: center;
@@ -572,7 +505,6 @@ const tagColor = new Map(
   }
 
   .catalog-count { color: var(--text-muted); font-size: 0.9rem; }
-
   .sort-label { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-muted); }
 
   .sort-label select {
@@ -585,7 +517,6 @@ const tagColor = new Map(
     cursor: pointer;
   }
 
-  /* ---------- сетка ---------- */
   .grid-products {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -599,8 +530,6 @@ const tagColor = new Map(
     flex-direction: column;
     transition: transform 0.2s, box-shadow 0.2s;
   }
-
-  .product-card[hidden] { display: none; }
 
   .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); border-color: var(--brand-green); }
 
@@ -641,7 +570,6 @@ const tagColor = new Map(
 
   .empty-state { color: var(--text-muted); padding: 40px 0; text-align: center; }
 
-  /* ---------- попап ---------- */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6);
     display: flex; align-items: center; justify-content: center;
@@ -704,84 +632,16 @@ const tagColor = new Map(
 
   .modal-image img { max-width: 100%; max-height: 380px; object-fit: contain; display: block; }
 
-  .modal-text h2 { font-size: 1.3rem; margin: 0 0 14px; }
+  .modal-text h2 { font-size: 1.3rem; margin: 0 0 10px; }
+  .modal-meta { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 14px; }
+  .modal-loading { color: var(--text-muted); font-style: italic; }
 
   .modal-desc p { margin-bottom: 12px; line-height: 1.6; color: var(--text-muted); }
   .modal-desc ul, .modal-desc ol { margin-bottom: 12px; padding-left: 20px; color: var(--text-muted); }
   .modal-desc li { margin-bottom: 5px; }
   .modal-desc strong { color: var(--text); }
 
-  /* ---------- адаптив ---------- */
-  @media (max-width: 1180px) {
-    .grid-products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  }
-
-  @media (max-width: 900px) {
-    .catalog-layout { grid-template-columns: 1fr; gap: 20px; }
-    .catalog-sidebar { position: static; padding: 0; }
-    .filters-toggle {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      padding: 14px 16px;
-      background: none;
-      border: 0;
-      font-family: inherit;
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text);
-      cursor: pointer;
-      text-align: left;
-    }
-    .filters-toggle-chevron { margin-left: auto; color: var(--brand-green); transition: transform 0.2s; }
-    .filters-toggle[aria-expanded="true"] .filters-toggle-chevron { transform: rotate(180deg); }
-    .filters-toggle-count {
-      background: var(--brand-green);
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 600;
-      padding: 1px 7px;
-      border-radius: 10px;
-    }
-    .filters-body { display: none; padding: 0 14px 16px; border-top: 1px solid var(--border-color); }
-    .catalog-sidebar.open .filters-body { display: block; }
-    .filters { flex-direction: row; flex-wrap: wrap; gap: 8px; }
-    .filter-btn {
-      width: auto;
-      border-left: 0;
-      border: 1px solid var(--border-color);
-      background: var(--bg-card);
-      padding: 7px 12px;
-      font-size: 0.85rem;
-    }
-    .filter-btn.active { border-color: var(--brand-green); }
-    .filter-reset { margin-top: 14px; width: auto; padding: 7px 14px; }
-    .filter-block + .filter-block { margin-top: 14px; }
-    .filter-block:first-child { margin-top: 14px; }
-  }
-
-  @media (max-width: 700px) {
-    .grid-products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .product-image { height: 150px; padding: 10px; }
-    .product-info { padding: 10px; }
-    .product-info h3 { font-size: 0.85rem; }
-    .short { display: none; }
-    .catalog-section { padding: 32px 0 60px; }
-  }
-
-  @media (max-width: 768px) {
-    .modal-overlay { padding: 0; align-items: flex-start; }
-    .modal-content { max-height: 100vh; min-height: 100vh; max-width: 100%; }
-    .modal-body { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
-    .modal-image { padding: 10px; }
-    .modal-image img { max-height: 42vh; }
-    .modal-text h2 { font-size: 1.15rem; }
-  }
-
-  .modal-meta { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 14px; }
-
-  :global(.pagination) {
+  .pagination {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -791,7 +651,7 @@ const tagColor = new Map(
     width: fit-content;
   }
 
-  :global(.page-btn) {
+  .page-btn {
     min-width: 46px;
     height: 46px;
     padding: 0 12px;
@@ -803,75 +663,64 @@ const tagColor = new Map(
     font-family: inherit;
     font-size: 0.98rem;
     font-weight: 600;
-    letter-spacing: 0.02em;
     color: var(--text);
     cursor: pointer;
-    transition: background 0.18s, color 0.18s, border-color 0.18s, transform 0.18s;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
   }
 
-  :global(.page-btn:hover:not(.disabled):not(.active)) {
-    border-color: var(--brand-green);
-    color: var(--brand-green);
-  }
+  .page-btn:hover:not(.disabled):not(.active) { border-color: var(--brand-green); color: var(--brand-green); }
+  .page-btn.active { background: var(--brand-green); border-color: var(--brand-green); color: #fff; box-shadow: 0 6px 16px rgba(23, 155, 73, 0.28); }
+  .page-btn.disabled { color: var(--border-color); cursor: default; }
+  .page-btn.nav { font-size: 1.25rem; line-height: 1; color: var(--brand-green); }
+  .page-btn.nav:hover:not(.disabled) { background: var(--brand-green); border-color: var(--brand-green); color: #fff; }
+  .page-btn.nav.disabled { color: #cfd6d1; }
+  .page-dots { color: var(--text-muted); padding: 0 2px; letter-spacing: 2px; }
 
-  :global(.page-btn.active) {
-    background: var(--brand-green);
-    border-color: var(--brand-green);
-    color: #fff;
-    box-shadow: 0 6px 16px rgba(23, 155, 73, 0.28);
-  }
-
-  :global(.page-btn.disabled) { color: var(--border-color); cursor: default; }
-
-  :global(.page-btn.nav) {
-    font-size: 1.25rem;
-    line-height: 1;
-    color: var(--brand-green);
-    border-color: var(--border-color);
-    background: var(--bg-card);
-  }
-
-  :global(.page-btn.nav:hover:not(.disabled)) { background: var(--brand-green); border-color: var(--brand-green); color: #fff; }
-  :global(.page-btn.nav.disabled) { color: #cfd6d1; border-color: var(--border-color); }
-
-  :global(.page-dots) { color: var(--text-muted); padding: 0 2px; letter-spacing: 2px; }
-
-  @media (max-width: 700px) {
-    :global(.pagination) { gap: 6px; margin-top: 30px; }
-    :global(.page-btn) { min-width: 40px; height: 40px; padding: 0 8px; font-size: 0.9rem; }
-    :global(.page-btn.nav) { font-size: 1.1rem; }
-  }
-
-  :global(.modal-loading) { color: var(--text-muted); font-style: italic; }
-
-  .search-input {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid var(--border-color);
-    background: var(--bg-card);
-    font-family: inherit;
-    font-size: 0.9rem;
-    color: var(--text);
-  }
-  .search-input:focus { outline: none; border-color: var(--brand-green); }
-
-  #subcatFilters .filter-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  #subcatFilters .filter-btn::before {
-    content: '';
-    width: 9px;
-    height: 9px;
-    flex-shrink: 0;
-    background: var(--tag-bg, transparent);
-    border: 1px solid rgba(0, 0, 0, 0.16);
+  @media (max-width: 1180px) {
+    .grid-products { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
 
   @media (max-width: 900px) {
-    #subcatFilters .filter-btn { display: inline-flex; }
-    #subcatFilters .filter-btn::before { width: 8px; height: 8px; }
+    .catalog-layout { grid-template-columns: 1fr; gap: 20px; }
+    .catalog-sidebar { position: static; padding: 0; max-height: none; }
+    .filters-toggle {
+      display: flex; align-items: center; gap: 10px; width: 100%;
+      padding: 14px 16px; background: none; border: 0;
+      font-family: inherit; font-size: 1rem; font-weight: 600; color: var(--text); cursor: pointer; text-align: left;
+    }
+    .filters-toggle-chevron { margin-left: auto; color: var(--brand-green); transition: transform 0.2s; }
+    .filters-toggle[aria-expanded="true"] .filters-toggle-chevron { transform: rotate(180deg); }
+    .filters-toggle-count { background: var(--brand-green); color: #fff; font-size: 0.72rem; font-weight: 600; padding: 1px 7px; border-radius: 10px; }
+    .filters-body { display: none; padding: 0 14px 16px; border-top: 1px solid var(--border-color); }
+    .catalog-sidebar.open .filters-body { display: block; }
+    .filters { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+    .filter-btn {
+      width: auto; border-left: 0; border: 1px solid var(--border-color);
+      background: var(--bg-card); padding: 7px 12px; font-size: 0.85rem;
+    }
+    .filter-btn.active { border-color: var(--brand-green); }
+    .filter-reset { margin-top: 14px; width: auto; padding: 7px 14px; }
+    .filter-block:first-child { margin-top: 14px; }
+  }
+
+  @media (max-width: 700px) {
+    .grid-products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .product-image { height: 150px; padding: 10px; }
+    .product-info { padding: 10px; }
+    .product-info h3 { font-size: 0.85rem; }
+    .short { display: none; }
+    .catalog-section { padding: 32px 0 60px; }
+    .pagination { gap: 6px; margin-top: 30px; }
+    .page-btn { min-width: 40px; height: 40px; padding: 0 8px; font-size: 0.9rem; }
+    .page-btn.nav { font-size: 1.1rem; }
+  }
+
+  @media (max-width: 768px) {
+    .modal-overlay { padding: 0; align-items: flex-start; }
+    .modal-content { max-height: 100vh; min-height: 100vh; max-width: 100%; }
+    .modal-body { grid-template-columns: 1fr; gap: 16px; padding: 16px; }
+    .modal-image { padding: 10px; }
+    .modal-image img { max-height: 42vh; }
+    .modal-text h2 { font-size: 1.15rem; }
   }
 </style>
