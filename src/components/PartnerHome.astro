@@ -32,7 +32,7 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     <div class="container">
       <h2 data-kicker="О компании">Презентация компании</h2>
       <div class="video-wrapper">
-        <video controls controlsList="nodownload" preload="metadata">
+        <video controls controlsList="nodownload" preload="none" poster="/video-poster-preza.webp">
           <source src="/preza.mp4" type="video/mp4" />
         </video>
       </div>
@@ -81,9 +81,9 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
 
   <section class="products-video-section bg-light-green">
     <div class="container">
-      <h2 data-kicker="Каталог">Продукция компании</h2>
+      <h2 data-kicker="О продукции">Продукция компании</h2>
       <div class="video-wrapper">
-        <video controls controlsList="nodownload" preload="metadata">
+        <video controls controlsList="nodownload" preload="none" poster="/video-poster-world.webp">
           <source src="/glworld.mp4" type="video/mp4" />
         </video>
       </div>
@@ -95,7 +95,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
   <section class="partnership">
     <div class="container">
       <div class="partnership-header">
-        <span class="eyebrow">БИЗНЕС С GREENLEAF</span>
         <h2 data-kicker="Бизнес с Greenleaf">Как стать партнёром и начать получать доход</h2>
         <p class="lead">Знаете ли вы, что на товарах, которыми мы пользуемся ежедневно, можно построить прибыльный бизнес? Один раз выбираем и оплачиваем стартовый пакет — и запускаем свой доход.</p>
       </div>
@@ -889,6 +888,7 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
   .company-info h2[data-kicker]::after,
   .start-sets h2[data-kicker]::after,
   .gallery-section h2[data-kicker]::after,
+  .partnership h2[data-kicker]::after,
   .cta h2[data-kicker]::after {
     margin-left: auto;
     margin-right: auto;
