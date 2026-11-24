@@ -33,19 +33,26 @@ import Base from '../layouts/Base.astro';
               />
             </div>
 
-            <div class="filter-block">
-              <h2 class="filter-title">Категория</h2>
-              <div class="filters" id="catFilters"></div>
+            <div class="filter-group">
+              <button type="button" class="filter-group-head" data-panel="panelCat" aria-expanded="false" aria-controls="panelCat">
+                <span class="fg-label">Категория</span>
+                <span class="fg-value" id="catValue">Все</span>
+                <svg class="fg-chevron" viewBox="0 0 12 8" width="11" height="7" aria-hidden="true">
+                  <path d="M1 1.5L6 6.5L11 1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div class="filter-group-panel" id="panelCat" hidden></div>
             </div>
 
-            <div class="filter-block">
-              <h2 class="filter-title">Подкатегория</h2>
-              <div class="filters" id="subcatFilters"></div>
-            </div>
-
-            <div class="filter-block">
-              <h2 class="filter-title">Бренд</h2>
-              <div class="filters" id="brandFilters"></div>
+            <div class="filter-group">
+              <button type="button" class="filter-group-head" data-panel="panelBrand" aria-expanded="false" aria-controls="panelBrand">
+                <span class="fg-label">Бренд</span>
+                <span class="fg-value" id="brandValue">Все</span>
+                <svg class="fg-chevron" viewBox="0 0 12 8" width="11" height="7" aria-hidden="true">
+                  <path d="M1 1.5L6 6.5L11 1.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <div class="filter-group-panel" id="panelBrand" hidden></div>
             </div>
 
             <button type="button" class="filter-reset" id="resetFilters">Сбросить фильтры</button>
@@ -149,50 +156,24 @@ import Base from '../layouts/Base.astro';
       const filtersCount = document.getElementById('filtersCount');
       const resetBtn = document.getElementById('resetFilters');
 
-      const catBox = document.getElementById('catFilters');
-      const subcatBox = document.getElementById('subcatFilters');
-      const brandBox = document.getElementById('brandFilters');
+      const catPanel = document.getElementById('panelCat');
+      const brandPanel = document.getElementById('panelBrand');
+      const catValue = document.getElementById('catValue');
+      const brandValue = document.getElementById('brandValue');
 
       filtersToggle.addEventListener('click', () => {
         const open = sidebar.classList.toggle('open');
         filtersToggle.setAttribute('aria-expanded', String(open));
       });
 
-      const makeBtn = (value, style) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'filter-btn';
-        b.dataset.value = value;
-        b.textContent = value;
-        if (style) b.setAttribute('style', style);
-        return b;
-      };
-
-      const renderFilterButtons = (box, values, key, colored) => {
-        box.innerHTML = '';
-        values.forEach((v) => {
-          const style = colored && v !== 'Все' ? `--tag-bg:${colorOf(v)[0]}` : '';
-          const btn = makeBtn(v, style);
-          if (state[key] === v) btn.classList.add('active');
-          btn.addEventListener('click', () => {
-            state[key] = v;
-            state.page = 1;
-            syncAvailability();
-            render();
-          });
-          box.appendChild(btn);
+      document.querySelectorAll('.filter-group-head').forEach((head) => {
+        head.addEventListener('click', () => {
+          const panel = document.getElementById(head.dataset.panel);
+          const willOpen = panel.hidden;
+          panel.hidden = !willOpen;
+          head.setAttribute('aria-expanded', String(willOpen));
         });
-      };
-
-      const currentSubs = () => {
-        if (state.cat === 'Все') {
-          const all = new Set();
-          DATA.products.forEach((p) => all.add(p.sub));
-          return ['Все', ...[...all]];
-        }
-        const cat = DATA.categories.find((c) => c.name === state.cat);
-        return cat ? ['Все', ...cat.subs] : ['Все'];
-      };
+      });
 
       const visibleProducts = () =>
         DATA.products.filter(
@@ -203,17 +184,82 @@ import Base from '../layouts/Base.astro';
             (!state.q || p.search.includes(state.q)),
         );
 
-      const syncAvailability = () => {
-        const subs = currentSubs();
-        if (!subs.includes(state.sub)) state.sub = 'Все';
+      const renderFilters = () => {
+        // подкатегория должна существовать в выбранной категории
+        const catSubs =
+          state.cat === 'Все'
+            ? null
+            : DATA.categories.find((c) => c.name === state.cat)?.subs ?? [];
+        if (state.sub !== 'Все' && catSubs && !catSubs.includes(state.sub)) state.sub = 'Все';
 
-        const filtered = visibleProducts();
-        const brands = new Set(filtered.map((p) => p.brand).filter(Boolean));
+        // --- категории (+ подкатегории под выбранной) ---
+        catPanel.innerHTML = '';
+        ['Все', ...DATA.categories.map((c) => c.name)].forEach((name) => {
+          const row = document.createElement('div');
+          row.className = 'cat-row';
+
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'filter-btn' + (state.cat === name ? ' active' : '');
+          btn.dataset.value = name;
+          btn.textContent = name;
+          btn.addEventListener('click', () => {
+            state.cat = name;
+            state.sub = 'Все';
+            state.page = 1;
+            renderFilters();
+            render();
+          });
+          row.appendChild(btn);
+
+          if (name !== 'Все' && state.cat === name) {
+            const subs = DATA.categories.find((c) => c.name === name)?.subs ?? [];
+            if (subs.length > 1) {
+              const subRow = document.createElement('div');
+              subRow.className = 'sub-row';
+              ['Все', ...subs].forEach((sub) => {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'sub-chip' + (state.sub === sub ? ' active' : '');
+                chip.dataset.value = sub;
+                chip.textContent = sub;
+                chip.addEventListener('click', () => {
+                  state.sub = sub;
+                  state.page = 1;
+                  renderFilters();
+                  render();
+                });
+                subRow.appendChild(chip);
+              });
+              row.appendChild(subRow);
+            }
+          }
+
+          catPanel.appendChild(row);
+        });
+
+        // --- бренды, доступные при текущем выборе ---
+        const brands = new Set(visibleProducts().map((p) => p.brand).filter(Boolean));
         if (state.brand !== 'Все' && !brands.has(state.brand)) state.brand = 'Все';
 
-        renderFilterButtons(catBox, ['Все', ...DATA.categories.map((c) => c.name)], 'cat');
-        renderFilterButtons(subcatBox, subs, 'sub', true);
-        renderFilterButtons(brandBox, ['Все', ...DATA.brands.filter((b) => brands.has(b))], 'brand');
+        brandPanel.innerHTML = '';
+        ['Все', ...DATA.brands.filter((b) => brands.has(b))].forEach((brand) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'filter-btn' + (state.brand === brand ? ' active' : '');
+          btn.dataset.value = brand;
+          btn.textContent = brand;
+          btn.addEventListener('click', () => {
+            state.brand = brand;
+            state.page = 1;
+            renderFilters();
+            render();
+          });
+          brandPanel.appendChild(btn);
+        });
+
+        catValue.textContent = state.cat;
+        brandValue.textContent = state.brand;
       };
 
       const cardHtml = (p) => {
@@ -362,7 +408,7 @@ import Base from '../layouts/Base.astro';
         searchTimer = setTimeout(() => {
           state.q = searchInput.value.trim().toLowerCase();
           state.page = 1;
-          syncAvailability();
+          renderFilters();
           render();
         }, 150);
       });
@@ -382,7 +428,7 @@ import Base from '../layouts/Base.astro';
         state.page = 1;
         searchInput.value = '';
         sortSelect.value = 'default';
-        syncAvailability();
+        renderFilters();
         render();
       });
 
@@ -395,7 +441,7 @@ import Base from '../layouts/Base.astro';
             p.search = `${p.title} ${p.article} ${p.brand} ${p.sub} ${p.cat}`.toLowerCase();
           });
           DATA = data;
-          syncAvailability();
+          renderFilters();
           render();
         })
         .catch(() => {
@@ -440,6 +486,71 @@ import Base from '../layouts/Base.astro';
     margin: 0 0 10px;
     font-weight: 700;
   }
+
+  /* ---------- аккордеон фильтров ---------- */
+  .filter-group { border-top: 1px solid var(--border-color); }
+  .filter-group:first-of-type { margin-top: 18px; }
+
+  .filter-group-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 2px;
+    background: none;
+    border: 0;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .filter-group-head:hover { color: var(--brand-green); }
+
+  .fg-value {
+    margin-left: auto;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--brand-green-dark);
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .fg-chevron { flex-shrink: 0; transition: transform 0.2s; }
+  .filter-group-head[aria-expanded="true"] .fg-chevron { transform: rotate(180deg); }
+
+  .filter-group-panel { padding: 0 0 14px; }
+
+  .cat-row + .cat-row { border-top: 1px dashed #eef1ee; }
+
+  .sub-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 2px 0 10px 12px;
+  }
+
+  .sub-chip {
+    padding: 5px 10px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    font-family: inherit;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+
+  .sub-chip:hover { border-color: var(--brand-green); color: var(--brand-green); }
+  .sub-chip.active { background: var(--brand-green-light); border-color: var(--brand-green); color: var(--brand-green-dark); font-weight: 600; }
 
   .filters { display: flex; flex-direction: column; gap: 2px; }
 
@@ -693,12 +804,22 @@ import Base from '../layouts/Base.astro';
     .filters-toggle-count { background: var(--brand-green); color: #fff; font-size: 0.72rem; font-weight: 600; padding: 1px 7px; border-radius: 10px; }
     .filters-body { display: none; padding: 0 14px 16px; border-top: 1px solid var(--border-color); }
     .catalog-sidebar.open .filters-body { display: block; }
-    .filters { flex-direction: row; flex-wrap: wrap; gap: 8px; }
-    .filter-btn {
-      width: auto; border-left: 0; border: 1px solid var(--border-color);
-      background: var(--bg-card); padding: 7px 12px; font-size: 0.85rem;
+    .filter-group-panel .filter-btn {
+      width: 100%;
+      border: 0;
+      border-left: 3px solid transparent;
+      background: transparent;
+      padding: 9px 10px;
+      font-size: 0.92rem;
+      text-align: left;
     }
-    .filter-btn.active { border-color: var(--brand-green); }
+    .filter-group-panel .filter-btn.active {
+      background: var(--brand-green-light);
+      border-left-color: var(--brand-green);
+      color: var(--brand-green-dark);
+    }
+    .sub-row { padding-left: 10px; }
+    .sub-chip { font-size: 0.82rem; padding: 6px 11px; }
     .filter-reset { margin-top: 14px; width: auto; padding: 7px 14px; }
     .filter-block:first-child { margin-top: 14px; }
   }
