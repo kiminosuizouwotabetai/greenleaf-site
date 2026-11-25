@@ -39,6 +39,10 @@ const ogImage = Astro.site ? new URL(image, Astro.site).href : image;
   <meta name="twitter:description" content={description} />
   <meta name="twitter:image" content={ogImage} />
 
+  <link rel="preload" as="image" href={partner.photo} />
+  {Astro.url.pathname.startsWith('/catalog') && (
+    <link rel="preload" as="fetch" href="/catalog/data.json" crossorigin="anonymous" />
+  )}
   <title>{title}</title>
 </head>
 <body>

@@ -26,7 +26,7 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
       </div>
       <div class="hero-visual">
         <div class="hero-image-wrapper">
-          <img src={partner.photo} alt={partner.fullName} />
+          <img src={partner.photo} alt={partner.fullName} fetchpriority="high" decoding="async" />
         </div>
       </div>
     </div>
@@ -368,13 +368,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     targets.push(h);
   });
 
-  // фото проявляются шторкой
-  const photos = document.querySelectorAll('.hero-image-wrapper img, .set-image img, .slider-slide img, .prod-slide img');
-  photos.forEach((img) => {
-    img.classList.add('img-reveal');
-    targets.push(img);
-  });
-
   // ---- числа в схеме ----
   const scheme = document.querySelector('.scheme-svg');
   const schemeNums = scheme
@@ -686,12 +679,13 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     content: '';
     position: absolute;
     inset: 16px -16px -16px 16px;
-    border: 2px solid rgba(23, 155, 73, 0.55);
+    background: rgba(23, 155, 73, 0.55);
     z-index: -1;
     transition: transform 0.5s cubic-bezier(.2,.7,.2,1);
   }
   .hero-image-wrapper:hover::after { transform: translate(8px, 8px); }
-  .hero-image-wrapper img { width: 100%; height: auto; display: block; object-fit: cover; }
+  .hero-image-wrapper { aspect-ratio: 1 / 1; }
+  .hero-image-wrapper img { width: 100%; height: 100%; display: block; object-fit: cover; }
 
   .divider {
     height: 1px;
@@ -881,17 +875,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
   .set-image img { transition: transform .6s cubic-bezier(.2,.7,.2,1); }
   .set-card:hover .set-image img { transform: scale(1.06); }
 
-  /* фото проявляются шторкой */
-  .img-reveal {
-    clip-path: inset(0 0 100% 0);
-    transition: clip-path 1s cubic-bezier(.2,.7,.2,1) .1s, transform 1.2s cubic-bezier(.2,.7,.2,1);
-    transform: scale(1.04);
-  }
-  .img-reveal.is-visible {
-    clip-path: inset(0 0 0 0);
-    transform: none;
-  }
-
   .bonus-scheme.is-visible .scheme-svg circle { animation: schemePop .6s cubic-bezier(.2,.7,.2,1) both; }
   .bonus-scheme.is-visible .scheme-svg circle:nth-of-type(2) { animation-delay: .12s; }
   .bonus-scheme.is-visible .scheme-svg circle:nth-of-type(3) { animation-delay: .24s; }
@@ -900,10 +883,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     to { transform: scale(1); opacity: 1; }
   }
   .scheme-svg circle { transform-box: fill-box; transform-origin: center; }
-
-  @media (prefers-reduced-motion: reduce) {
-    .img-reveal { clip-path: none !important; transform: none !important; transition: none !important; }
-  }
 
   .info-card, .step-card, .set-card {
     transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s, border-color .4s;
