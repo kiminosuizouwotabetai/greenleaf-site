@@ -339,6 +339,340 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
   </section>
 
   <script is:inline>
+        function initSlider() {
+      const track = document.getElementById('sliderTrack');
+      const slides = document.querySelectorAll('.slider-slide');
+      const prevBtn = document.getElementById('prevBtn');
+      const nextBtn = document.getElementById('nextBtn');
+      const dotsContainer = document.getElementById('sliderDots');
+      
+      if (!track || !prevBtn || !nextBtn || !dotsContainer) return;
+
+      let currentIndex = 0;
+      const totalSlides = slides.length;
+      const intervalTime = 6000;
+      let autoPlayInterval;
+
+      for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.classList.add('slider-dot');
+        if (i === 0) dot.classList.add('active');
+        dot.addEventListener('click', () => {
+          goToSlide(i);
+        });
+        dotsContainer.appendChild(dot);
+      }
+
+      const dots = document.querySelectorAll('.slider-dot');
+
+      function updateSlider() {
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        dots.forEach((dot, index) => {
+          if (index === currentIndex) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+
+      function goToSlide(index) {
+        currentIndex = index;
+        updateSlider();
+      }
+
+      function nextSlide() {
+        currentIndex = (currentIndex + 1) % totalSlides;
+        updateSlider();
+      }
+
+      function prevSlide() {
+        currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+        updateSlider();
+      }
+
+      function startAutoPlay() {
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
+        autoPlayInterval = setInterval(nextSlide, intervalTime);
+      }
+
+      function stopAutoPlay() {
+        if (autoPlayInterval) clearInterval(autoPlayInterval);
+      }
+
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        stopAutoPlay();
+        startAutoPlay();
+      });
+
+      prevBtn.addEventListener('click', () => {
+        prevSlide();
+        stopAutoPlay();
+        startAutoPlay();
+      });
+
+      dotsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('slider-dot')) {
+          stopAutoPlay();
+          startAutoPlay();
+        }
+      });
+
+      const sliderContainer = document.querySelector('.slider-wrapper');
+      if (sliderContainer) {
+        sliderContainer.addEventListener('mouseenter', stopAutoPlay);
+        sliderContainer.addEventListener('mouseleave', startAutoPlay);
+      }
+
+      startAutoPlay();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initSlider);
+    } else {
+      initSlider();
+    }
+
+    const productData = {
+      sealuxe_yeast: {
+        title: "Набор ухаживающей косметики на основе двувалентных дрожжей",
+        desc: `<p>SEALUXE® представляет свое новейшее достижение в области ухода за кожей. Каждый продукт косметической серии предназначен для определенной ступени ухода за кожей, обеспечивая комплексный подход к её увлажнению, питанию и восстановлению.</p>
+               <p>Бифидодрожжи в косметике увлажняют кожу, делая её более упругой и гладкой. Помогают восстановить защитный барьер кожи, защищая от внешних раздражителей и улучшая текстуру кожи. Компоненты линейки также обладают антивозрастными и противовоспалительными свойствами, подходят для чувствительной и зрелой кожи.</p>
+               <p><strong>Активные ингредиенты:</strong> никотинамид, продукты ферментации бифидодрожжей, карнозин, аргинин, лизин, экстракт корня шлемника байкальского, каррагинан, экстракт корня софоры, экстракт цветков маргаритки, экстракт розы, экстракт жасмина, молочная кислота, токоферол (витамин E).</p>
+               <ul>
+                 <li><strong>Двухкомпонентное дрожжевое очищающее средство для умывания (100г).</strong> Инновационный продукт сочетает в себе мощные очищающие свойства с нежным уходом. Содержит поверхностно-активные очищающие ингредиенты с двумя аминокислотами, создающие плотную пенящуюся текстуру. Обогащен комплексом увлажняющих и питательных компонентов.</li>
+                 <li><strong>Двухкомпонентный дрожжевой тоник (120мл).</strong></li>
+                 <li><strong>Смягчающий лосьон на основе двухвалентных дрожжей (100 мл).</strong></li>
+                 <li><strong>Смягчающая эссенция на основе двухвалентных дрожжей (30 мл).</strong> Сочетают в себе мощные увлажняющие свойства с нежным уходом. Бифидодрожжи стимулируют регенеративные процессы и укрепляют защитный барьер кожи, уменьшают видимость морщин, повышают упругость и эластичность.</li>
+                 <li><strong>Укрепляющий крем с бифидодрожжами (50г).</strong> Мягко ухаживает за чувствительной кожей, не вызывая раздражения. Имеет легкую текстуру, быстро впитывается и не оставляет жирного блеска.</li>
+                 <li><strong>Укрепляющий крем для глаз на основе бифидодрожжей (20г).</strong> Обеспечивает глубокое увлажнение, обогащен комплексом питательных компонентов.</li>
+               </ul>`,
+        images: ["/images/startsetgoods/purple1.webp", "/images/startsetgoods/purple2.webp", "/images/startsetgoods/purple3.webp", "/images/startsetgoods/purple4.webp", "/images/startsetgoods/purple5.jpg", "/images/startsetgoods/purple6.webp"]
+      },
+      toothpaste_ilife: {
+        title: "Зубная паста на основе морских водорослей (120г)",
+        desc: `<p>Зубная паста с водорослями iLiFE:</p>
+               <ul>
+                 <li>укрепляет эмаль и защищает зубы от кариеса,</li>
+                 <li>уменьшает проблемы с деснами,</li>
+                 <li>устраняет повреждения слизистой оболочки,</li>
+                 <li>убирает неприятный запах изо рта,</li>
+                 <li>улучшает здоровье ротовой полости.</li>
+               </ul>
+               <p>Экстракт водорослей укрепляет эмаль и предупреждает развитие кариеса зубов в 2-3 раза эффективнее, чем сопоставляемые сенситивные зубные пасты, в т.ч. фторсодержащие.</p>
+               <p>Зубная паста эффективно и бережно очищает эмаль зубов до естественного цвета, эффективно удаляет зубной налет и препятствует его образованию.</p>
+               <ul>
+                 <li>Паста имеет мягкую текстуру;</li>
+                 <li>Содержит мяту (освежающий эффект);</li>
+                 <li>Экстракт морских водорослей предотвращение воспаления;</li>
+                 <li>Глицирризинат дикалия имеет детоксикационный, противовоспалительный и противоаллергический эффект;</li>
+                 <li>Не содержит фторсодержащих элементов.</li>
+               </ul>
+               <p>Данная паста - это комплексная защита и полное очищение зубов. Подходит для всей семьи.</p>`,
+        images: ["/images/startsetgoods/tooth1.webp", "/images/startsetgoods/tooth2.webp"]
+      },
+      pads_anian: {
+        title: "Женские гигиенические ухаживающие прокладки с аниановым чипом",
+        desc: `<p><strong>Инновационный 8-слойный дизайн:</strong></p>
+               <ol>
+                 <li>Анионовый магнитный чип</li>
+                 <li>100% хлопок</li>
+                 <li>Аирлайд бумага</li>
+                 <li>Прокладочная бумага</li>
+                 <li>Высокомолекулярный абсорбирующий слой</li>
+                 <li>Воздухопроницаемая мембрана</li>
+                 <li>Защитная пленка</li>
+                 <li>Слой клея (без флуоресценции)</li>
+               </ol>
+               <p>Каждая прокладка создана для максимального комфорта и эффективности:</p>
+               <ul>
+                 <li>Инновационный дизайн обеспечивает исключительную посадку и защиту.</li>
+                 <li>Отсутствие флуоресцентных добавок и ароматизаторов гарантирует естественное ощущение без раздражений.</li>
+                 <li>Мягкая быстровпитывающая поверхность идеально подходит для чувствительной кожи.</li>
+                 <li>Анионовый чип активно борется с бактериями и запахами, обеспечивая антибактериальное и профилактическое действие.</li>
+               </ul>
+               <p>Технология анионовой системы включает в себя выделение полезных молекул анионов, которые генерируются анионовым чипом, интегрированным в хлопковую поверхность прокладки. Эти анионы помогают нейтрализовать неприятные запахи и предотвращать бактериальное размножение, обеспечивая чистоту и свежесть на протяжении всего дня.</p>`,
+        images: ["/images/startsetgoods/procl1.webp"]
+      },
+      napkins_bamboo: {
+        title: "Натуральные салфетки из небеленого бамбукового волокна",
+        desc: `<p>Продукт слегка желтоватого цвета — натуральный цвет без отбеливания. Без запаха. В составе только природные компоненты. Не вызывает раздражение. Без добавок. Высокая температурная обработка без отбеливания.</p>
+               <p>Салфетки прочные стерилизованные ультрафиолетом. Изготовлены в соответствии с европейско-американским стандартам FDA \AP. Соответствует нормам пищевых стандартов FDA и стандартным требованиям к пищевым продуктам EU AP (2002).</p>
+               <p>Продукт приятный при контакте с кожей как в сухом, так и влажном состоянии.</p>
+               <p>Трёхслойная гигиеническая бамбуковая ткань — это тип супер-натуральной необработанной бамбуковой ткани, изготовленной из натуральных бамбуковых волокон без отбеливания или добавления флуоресцентного отбеливающего агента, диоксинов и вредных веществ.</p>
+               <ul>
+                 <li>Эко волокно — естественная профилактика от акарида, клопов и клещей.</li>
+                 <li>Уровень антибактериальной защиты может достигать 75% в течение 24 часов.</li>
+               </ul>
+               <p><strong>Сфера применения:</strong> уход в период менструации, удаление маслянистых жидкости – вода, уход при аллергических рините, уход за новорождёнными и беременными.</p>`,
+        images: ["/images/startsetgoods/paper1.webp", "/images/startsetgoods/paper2.webp"]
+      },
+      gel_laundry: {
+        title: "Многофункциональный гель для стирки (1кг)",
+        desc: `<ul>
+                 <li><strong>Эффективное удаление загрязнений:</strong> Гель iLiFE содержит комплекс активных энзимов, которые легко справляются с различными видами пятен, будь то грязь, пот, трава, масло или вино.</li>
+                 <li><strong>Бережное отношение к тканям:</strong> Не содержит агрессивных химических веществ, которые могут повредить волокна ткани.</li>
+                 <li><strong>Легкое полоскание:</strong> Гель легко растворяется в воде и не оставляет следов на одежде.</li>
+                 <li><strong>Безопасность:</strong> Не содержит фосфатов, флуоресцентных отбеливателей и других вредных веществ. Гипоаллергенен и подходит для людей с чувствительной кожей.</li>
+                 <li><strong>Экономичность:</strong> Гель концентрирован, поэтому его хватает надолго.</li>
+               </ul>`,
+        images: ["/images/startsetgoods/wash1.webp"]
+      },
+      dish_soap: {
+        title: "Жидкое средство для мытья посуды (1кг)",
+        desc: `<p>Моющее средство, предназначенное для мытья посуды и овощей/фруктов, сочетает в себе безопасность и эффективность. Основой средства служит очищенная вода, которая обеспечивает нежное воздействие на поверхности и безопасность для пищевых продуктов.</p>
+               <p>Кокосовое поверхностно-активное вещество в составе отличается мягкими очищающими свойствами, делая его идеальным для удаления жира и загрязнений как с посуды, так и с овощей и фруктов. Глицерин в составе ухаживает за кожей рук, предотвращая ее сухость и раздражение. Ароматизатор придает приятный и свежий аромат.</p>
+               <p>Средство является экологичным и безопасным выбором для ежедневного использования.</p>
+               <p><strong>Состав:</strong> Очищенная вода, кокосовое поверхностно-активное вещество, глицерин, ароматизатор.</p>`,
+        images: ["/images/startsetgoods/disheswash1.webp"]
+      },
+      sealuxe_sea: {
+        title: "Набор ухаживающей косметики «Морское цветение»",
+        desc: `<p>В основе серии — уникальный увлажняющий компонент VTMM. Извлеченный из соединений экзополисахаридов в микробиологии глубоководного вулканического канала ниже 3000 метров и уникальных антиоксидантных растений, он помогает воде транспортироваться к самому основанию кожи.</p>
+               <p>Благодаря VTMM каждый слой кожи становится увлажненным, эластичным и нежным; замедляется процесс старения кожи, и кожа сохраняет сияющий и молодой вид на протяжении долгого времени.</p>
+               <ul>
+                 <li><strong>Морской увлажняющий очищающий гель (100 g).</strong> Нежный очищающий гель с глубоководным увлажняющим фактором HydraSea Advanced Complex, который успокаивает, увлажняет и пробуждает кожу. Легко взбивается в нежнейшую пену, бережно снимает загрязнения, глубоко очищает поры.</li>
+                 <li><strong>Омолаживающий увлажняющий питательный тоник (120 ml).</strong> Инновационный фактор глубоководной конденсации HydraSeaCalmingComplex помогает улучшить перенос воды в роговой слой. Вертикальная увлажняющая система (VTMM) увлажняет каждый слой кожи, делая ее упругой, замедляет передачу факторов стресса и выравнивает тон кожи.</li>
+                 <li><strong>Интенсивный увлажняющий лосьон (60 ml).</strong> Частицы мягкого света осветляют потемнения, уменьшают морщины. Открывает внутренний водный канал кожи. Активная гиалуроновая кислота образует высокоэффективную водоотталкивающую пленку.</li>
+                 <li><strong>Морской увлажняющий крем с глубоким увлажняющим эффектом (50 g).</strong> Эффективно повышает защиту кожи от ультрафиолетовых лучей и успокаивает кожу. Трехмолекулярная вертикальная увлажняющая система (VTMM) открывает водные каналы в коже, помогая набирать влагу.</li>
+               </ul>`,
+        images: ["/images/startsetgoods/white1.webp", "/images/startsetgoods/white2.webp", "/images/startsetgoods/white3.webp", "/images/startsetgoods/white4.webp"]
+      },
+      kardli_cup: {
+        title: "Стакан Kardli для получения оздоровительной воды",
+        desc: `<p>Стакан Kardli сделает из обычной очищенной воды живую: активированную слабощелочную ионизированную воду с отрицательным ОВП.</p>
+               <p><strong>Такая вода обладает следующими характеристиками:</strong></p>
+               <ul>
+                 <li>не содержит опасных химических веществ</li>
+                 <li>не содержит болезнетворных бактерий</li>
+                 <li>обладает полезным минеральным составом, который необходим для жизнедеятельности организма</li>
+                 <li>вода структурирована, а значит, усвоение ее организмом займет гораздо меньше времени и энергии</li>
+                 <li>растворяет жир</li>
+                 <li>разрушает алкоголь</li>
+                 <li>меняет кислую среду воды на щелочную</li>
+                 <li>это вкусная и полезная питьевая вода для ежедневного применения.</li>
+               </ul>
+               <p>Доказано, что такая вода обладает повышенной проницаемостью сквозь клеточные мембраны и может растворять питательные вещества и доставлять их внутрь клеток, способствует улучшению состояния кожных покровов и очищению сосудов, повышает тонус организма, а также стимулирует иммунитет и регенерацию клеток.</p>
+               <p><strong>Особенности стакана Kardli:</strong></p>
+               <ul>
+                 <li>Немецкие технологии.</li>
+                 <li>Бесшовный воздухо- и пыленепроницаемый корпус.</li>
+                 <li>Усиленное дно. Гигиеничный.</li>
+                 <li>Качественный промежуточный теплоизоляционный слой: сохранит воду холодной летом и горячей зимой.</li>
+                 <li>Износостойкая и устойчивая к царапинам поверхность.</li>
+                 <li>Высокотехнологичный активный фильтр AST, выполненный из материала, имитирующего естественную экологическую среду минеральных фильтрующих веществ.</li>
+                 <li>Высокий, стильный, красивый и удобный дизайн. Предназначен только для воды.</li>
+               </ul>
+               <p><strong>Способ применения:</strong> Перед первым использованием открутить фильтр, прополоскать его и ненадолго поместить в емкость с водой. Прополоскать сам стакан горячей водой, но не кипятком. 150-200мл воды встряхиваем в стакане в течение 2 минут: 15 раз по горизонтали, 15 раз по вертикали, перевернуть стакан на 5-15 минут. Вода готова!</p>`,
+        images: ["/images/startsetgoods/kardlicup.webp"]
+      },
+      brush_carich: {
+        title: "Зубная щетка с гибкой и мягкой щетиной",
+        desc: `<p>Мягкая щетина обеспечивает бережную защиту десен.</p>
+               <p>Кончик щетины проникает глубоко в промежутки между зубами, очищая и заботясь о здоровье зубов.</p>
+               <p>Безопасна и удобна в использовании.</p>
+               <p>Стильная нескользящая ручка обеспечит удобный захват и сэкономит трудозатраты.</p>`,
+        images: ["/images/startsetgoods/teethbrush.webp"]
+      }
+    };
+
+    const setCards = document.querySelectorAll('.set-card');
+    const modals = document.querySelectorAll('.modal-overlay');
+    const closeButtons = document.querySelectorAll('.modal-close');
+    const clickableItems = document.querySelectorAll('.clickable-item');
+    
+    const productModal = document.getElementById('productModal');
+    const closeProductModal = document.getElementById('closeProductModal');
+    const productTitle = document.getElementById('productTitle');
+    const productDesc = document.getElementById('productDesc');
+    const productImageTrack = document.getElementById('productImageTrack');
+    const prodPrev = document.getElementById('prodPrev');
+    const prodNext = document.getElementById('prodNext');
+
+    let currentProductImages = [];
+    let currentImageIndex = 0;
+
+    function updateProductImage() {
+      productImageTrack.style.transform = `translateX(-${currentImageIndex * 100}%)`;
+    }
+
+    setCards.forEach(card => {
+      card.addEventListener('click', () => {
+        const targetId = card.getAttribute('data-target');
+        const targetModal = document.getElementById(targetId);
+        if (targetModal) targetModal.classList.add('active');
+      });
+    });
+
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.closest('.modal-overlay').classList.remove('active');
+      });
+    });
+
+    modals.forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+
+    clickableItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const prodId = item.getAttribute('data-product');
+        const data = productData[prodId];
+
+        if (data) {
+          productTitle.textContent = data.title;
+          productDesc.innerHTML = data.desc;
+          
+          productImageTrack.innerHTML = data.images.map(img => `
+            <div class="prod-slide"><img src="${img}" alt="${data.title}" /></div>
+          `).join('');
+
+          currentProductImages = data.images;
+          currentImageIndex = 0;
+          updateProductImage();
+
+          if (currentProductImages.length > 1) {
+            prodPrev.style.display = 'flex';
+            prodNext.style.display = 'flex';
+          } else {
+            prodPrev.style.display = 'none';
+            prodNext.style.display = 'none';
+          }
+
+          productModal.classList.add('active');
+        }
+      });
+    });
+
+    closeProductModal.addEventListener('click', (e) => {
+      e.stopPropagation();
+      productModal.classList.remove('active');
+    });
+
+    prodNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentImageIndex < currentProductImages.length - 1) {
+        currentImageIndex++;
+        updateProductImage();
+      }
+    });
+
+    prodPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (currentImageIndex > 0) {
+        currentImageIndex--;
+        updateProductImage();
+      }
+    });
+  </script>
+
+<script is:inline>
 (() => {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const targets = [];
