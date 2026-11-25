@@ -21,7 +21,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
         <div class="hero-facts">
           <div class="fact"><b data-count="885">885</b><span>товаров в каталоге</span></div>
           <div class="fact"><b data-count="16">16</b><span>категорий продукции</span></div>
-          <div class="fact fact-text"><span>Доставка по России</span></div>
         </div>
       </div>
       <div class="hero-visual">
@@ -349,16 +348,8 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     if (sec.classList.contains('hero')) return;
     sec.querySelectorAll('.container > *').forEach((el, i) => {
       el.classList.add('reveal');
-      el.style.setProperty('--d', (i * 90) + 'ms');
+      el.style.setProperty('--d', (i * 60) + 'ms');
       targets.push(el);
-    });
-  });
-
-  document.querySelectorAll('.grid-info, .steps-grid, .sets-grid').forEach((grid) => {
-    [...grid.children].forEach((card, i) => {
-      card.classList.add('reveal');
-      card.style.setProperty('--d', (i * 90) + 'ms');
-      targets.push(card);
     });
   });
 
@@ -385,9 +376,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     requestAnimationFrame(step);
   };
 
-  // ---- счётчики в герое ----
-  const counters = document.querySelectorAll('[data-count]');
-
   if (reduce) {
     targets.forEach((el) => el.classList.add('is-visible'));
     schemeNums.forEach((t) => { t.textContent = t.dataset.target; });
@@ -403,25 +391,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
   }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
   targets.forEach((el) => io.observe(el));
 
-  const cio = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      if (!e.isIntersecting) return;
-      const el = e.target;
-      const target = Number(el.dataset.count) || 0;
-      const dur = 1300;
-      const t0 = performance.now();
-      const tick = (t) => {
-        const p = Math.min(1, (t - t0) / dur);
-        const eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = Math.round(target * eased).toLocaleString('ru-RU');
-        if (p < 1) requestAnimationFrame(tick);
-      };
-      requestAnimationFrame(tick);
-      cio.unobserve(el);
-    });
-  }, { threshold: 0.5 });
-  counters.forEach((c) => cio.observe(c));
-
   // ---- числа схемы: запускаем при появлении блока ----
   if (scheme && schemeNums.length) {
     const sio = new IntersectionObserver((entries) => {
@@ -436,22 +405,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     sio.observe(scheme);
   }
 
-  // ---- лёгкий параллакс паттерна ----
-  const patterns = [...document.querySelectorAll('.bg-light-green')];
-  if (patterns.length && !reduce) {
-    let ticking = false;
-    const move = () => {
-      patterns.forEach((sec) => {
-        const r = sec.getBoundingClientRect();
-        sec.style.backgroundPositionY = Math.round(-r.top * 0.12) + 'px';
-      });
-      ticking = false;
-    };
-    window.addEventListener('scroll', () => {
-      if (!ticking) { ticking = true; requestAnimationFrame(move); }
-    }, { passive: true });
-    move();
-  }
 })();
 </script>
 
@@ -465,7 +418,7 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     if (sec.classList.contains('hero')) return;
     sec.querySelectorAll('.container > *').forEach((el, i) => {
       el.classList.add('reveal');
-      el.style.setProperty('--d', (i * 90) + 'ms');
+      el.style.setProperty('--d', (i * 60) + 'ms');
       targets.push(el);
     });
   });
@@ -543,17 +496,11 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
   }
   .hero-glow::before {
     width: 760px; height: 760px; right: -180px; top: -260px;
-    background: radial-gradient(circle, rgba(23,155,73,.16), rgba(23,155,73,0) 62%);
-    animation: floatGlow 16s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(23,155,73,.13), rgba(23,155,73,0) 62%);
   }
   .hero-glow::after {
     width: 520px; height: 520px; left: -180px; bottom: -280px;
-    background: radial-gradient(circle, rgba(0,104,46,.10), rgba(0,104,46,0) 66%);
-    animation: floatGlow 22s ease-in-out infinite reverse;
-  }
-  @keyframes floatGlow {
-    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-    50% { transform: translate3d(-26px, 30px, 0) scale(1.07); }
+    background: radial-gradient(circle, rgba(0,104,46,.08), rgba(0,104,46,0) 66%);
   }
 
   .hero h1 {
@@ -587,21 +534,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
-  }
-  .fact-text { align-self: flex-end; padding-bottom: 2px; }
-  .fact-text span {
-    margin: 0;
-    font-size: 0.92rem;
-    letter-spacing: 0;
-    text-transform: none;
-  }
-  .fact-text::before {
-    content: '';
-    display: block;
-    width: 26px;
-    height: 2px;
-    margin-bottom: 12px;
-    background: var(--brand-green);
   }
 
   .scroll-hint {
@@ -655,7 +587,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
 
 
   @media (max-width: 640px) {
-    .hero-image-wrapper::after { inset: 10px -10px -10px 10px; }
     .hero-facts { gap: 26px; margin-top: 36px; }
     .scroll-hint { display: none; }
   }
@@ -667,22 +598,12 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
   
   .hero-visual { display: flex; justify-content: center; align-items: center; }
   .hero-image-wrapper {
-    position: relative;
-    isolation: isolate;
     width: 100%;
     max-width: 460px;
     margin: 0 auto;
-    box-shadow: 0 30px 60px rgba(0, 104, 46, 0.18);
+    border: 4px solid var(--brand-green);
+    box-shadow: 0 24px 50px rgba(0, 104, 46, 0.15);
   }
-  .hero-image-wrapper::after {
-    content: '';
-    position: absolute;
-    inset: 16px -16px -16px 16px;
-    border: 2px solid rgba(23, 155, 73, 0.55);
-    z-index: -1;
-    transition: transform 0.5s cubic-bezier(.2,.7,.2,1);
-  }
-  .hero-image-wrapper:hover::after { transform: translate(8px, 8px); }
   .hero-image-wrapper { aspect-ratio: 1 / 1; }
   .hero-image-wrapper img { width: 100%; height: 100%; display: block; object-fit: cover; }
 
@@ -871,8 +792,6 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
   }
 
    .set-image { overflow: hidden; }
-  .set-image img { transition: transform .6s cubic-bezier(.2,.7,.2,1); }
-  .set-card:hover .set-image img { transform: scale(1.06); }
 
   .bonus-scheme.is-visible .scheme-svg circle { animation: schemePop .6s cubic-bezier(.2,.7,.2,1) both; }
   .bonus-scheme.is-visible .scheme-svg circle:nth-of-type(2) { animation-delay: .12s; }
@@ -887,20 +806,20 @@ const contactsHref = `/partners/${partner.slug}/contacts/`;
     transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s, border-color .4s;
   }
   .info-card:hover, .step-card:hover, .set-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 44px rgba(0, 104, 46, 0.13);
-    border-color: rgba(23, 155, 73, 0.35);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 104, 46, 0.09);
+    border-color: rgba(23, 155, 73, 0.28);
   }
-  .info-icon { transition: transform .45s cubic-bezier(.2,.7,.2,1); }
-  .info-card:hover .info-icon { transform: scale(1.1) rotate(-5deg); }
+  .info-icon { transition: transform .35s ease; }
+  .info-card:hover .info-icon { transform: scale(1.04); }
 
-  .video-wrapper { transition: transform .45s cubic-bezier(.2,.7,.2,1), box-shadow .45s; }
-  .video-wrapper:hover { transform: translateY(-5px); box-shadow: 0 26px 54px rgba(0, 104, 46, 0.16); }
+  .video-wrapper { transition: box-shadow .35s ease; }
+  .video-wrapper:hover { box-shadow: 0 20px 44px rgba(0, 104, 46, 0.12); }
 
   h2[data-kicker]::after {
     transform: scaleX(0);
     transform-origin: left center;
-    transition: transform .9s cubic-bezier(.2,.7,.2,1) .15s;
+    transition: transform .6s ease .1s;
   }
   h2[data-kicker].is-visible::after { transform: scaleX(1); }
 
