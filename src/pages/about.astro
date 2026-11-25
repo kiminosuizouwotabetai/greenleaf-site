@@ -2,166 +2,418 @@
 import Base from '../layouts/Base.astro';
 ---
 <Base title="О компании — Сервисный центр Greenleaf в Геленджике">
-  <section class="about-hero bg-light-green">
-    <div class="container narrow">
-      <h1>О компании Greenleaf</h1>
-      <p class="lead">Компания основана в 1998 году в г. Сучжоу, Китай. С самого начала своего развития компания была ориентирована на самые высокие технологии в области производства товаров широкого спроса.</p>
+  <section class="about-hero">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="container">
+      <span class="eyebrow">О компании</span>
+      <h1>Greenleaf — биотехнологии<br>из Сучжоу для всего мира</h1>
+      <p class="hero-lead">Компания основана в 1998 году в г. Сучжоу, Китай. С самого начала развитие было ориентировано на самые высокие технологии в производстве товаров широкого спроса.</p>
+
+      <div class="stats-grid">
+        <div class="stat-item reveal">
+          <div class="stat-value">10 млрд</div>
+          <div class="stat-label">План ежегодных продаж в долларах</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-value">&gt; 30</div>
+          <div class="stat-label">Стран и регионов мира</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-value">68 млн</div>
+          <div class="stat-label">Инвестиции в косметический парк, $</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-value">&gt; 300 000</div>
+          <div class="stat-label">Партнёров по всему миру</div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="about-content">
-    <div class="container narrow">
-      
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-value">10 МЛРД</div>
-          <div class="stat-label">Планы достижения ежегодных продаж в размере 10 миллиардов долларов</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">&gt; 30</div>
-          <div class="stat-label">Более чем 30 стран и регионов мира</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">68 МЛН</div>
-          <div class="stat-label">Промышленный косметический парк с инвестицией в 68 миллионов долларов</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">&gt; 300 000</div>
-          <div class="stat-label">Более 300 000 партнеров по всему миру</div>
-        </div>
+  <section class="about-section">
+    <div class="container">
+      <div class="section-head">
+        <h2 data-kicker="История">Наш путь</h2>
+        <p class="section-lead">От научной группы до лидера китайской биотехнологической отрасли.</p>
       </div>
-
-      <div class="text-block">
-        <h2>Наш путь</h2>
+      <div class="two-col">
         <p>Научно-техническая группа Greenleaf постоянно наращивала темпы своего роста и постепенно превратилась в научного первопроходца и лидера китайской биотехнологической промышленности.</p>
-        <p>Наша компания уделяет особое внимание научным разработкам, умному производству, онлайн-продажам, физическим магазинам, продуманной логистике, защите данных, разработке программного обеспечения, контенту и стриммингу в сфере электронной коммерции. Задавшись целью развивать международный рынок, были открыты филиалы в более чем 30 странах и регионах мира: в Юго-Восточной Азии, Африке, Восточной Европе, странах СНГ, России.</p>
+        <p>Компания уделяет особое внимание научным разработкам, умному производству, онлайн-продажам, физическим магазинам, продуманной логистике, защите данных, разработке программного обеспечения, контенту и стриммингу в сфере электронной коммерции. Задавшись целью развивать международный рынок, открыты филиалы в более чем 30 странах и регионах: в Юго-Восточной Азии, Африке, Восточной Европе, странах СНГ и России.</p>
       </div>
+    </div>
+  </section>
 
-      <div class="text-block">
-        <h2>Философия компании</h2>
-        <ul class="philosophy-list">
-          <li><strong>Стратегия:</strong> Распространение высококачественной продукции по разумной цене на мировом рынке.</li>
-          <li><strong>Миссия:</strong> Сделать людей счастливее, здоровее, красивее и богаче.</li>
-          <li><strong>Ценности:</strong> Гармония, альтруизм по отношению к себе, честность, преданность делу, полная отдача и инновации.</li>
-          <li><strong>Программа:</strong> Стремление стать лучшим работодателем на мировом уровне, крупнейшей платформой качественных продуктов по разумной цене и целевым участником благотворительности в Китае.</li>
-        </ul>
+  <section class="about-section is-tinted">
+    <div class="container">
+      <div class="section-head">
+        <h2 data-kicker="Принципы">Философия компании</h2>
+        <p class="section-lead">Четыре опоры, на которых держится бизнес Greenleaf.</p>
       </div>
-
-      <div class="text-block">
-        <h2>Ключевые особенности</h2>
-        
-        <div class="feature-item">
-          <h3>01. Современный косметический парк с высокими стандартами качества</h3>
-          <p>Научно-техническая группа Гринлиф создала современный промышленный косметический парк, вложив огромные инвестиции. Этот центр отличается высокими стандартами качества и сертифицирован по международным стандартам. Здесь используется передовое оборудование и технологии, что гарантирует высокое качество продукции.</p>
+      <div class="philosophy-grid">
+        <div class="phil-card reveal">
+          <div class="phil-num">01</div>
+          <h3>Стратегия</h3>
+          <p>Распространение высококачественной продукции по разумной цене на мировом рынке.</p>
         </div>
-
-        <div class="feature-item">
-          <h3>02. Мировая производственная мощность и разнообразие брендов</h3>
-          <p>Промышленный косметический парк Гринлиф обладает мировой производственной мощностью, способной удовлетворить потребности в косметических продуктах. Здесь представлено множество брендов, включая SEALUXE, iLife, Kardli, Carich, Nilrich, Chanery, Green-Pai и Easy-Love, которые завоевали популярность у потребителей.</p>
+        <div class="phil-card reveal">
+          <div class="phil-num">02</div>
+          <h3>Миссия</h3>
+          <p>Сделать людей счастливее, здоровее, красивее и богаче.</p>
         </div>
-
-        <div class="feature-item">
-          <h3>03. Поддержка правительства и стратегический рост</h3>
-          <p>Гринлиф получила лицензию на прямой маркетинг от Министерства торговли Китая, что подчеркивает её статус и поддержку со стороны правительства. С учетом поддержки Партии и национального правительства, компания стремится к стратегическому росту и амбициозной цели достичь ежегодных продаж на уровне 10 миллиардов долларов в ближайшие 3 года.</p>
+        <div class="phil-card reveal">
+          <div class="phil-num">03</div>
+          <h3>Ценности</h3>
+          <p>Гармония, альтруизм по отношению к себе, честность, преданность делу, полная отдача и инновации.</p>
         </div>
-
-        <div class="feature-item">
-          <h3>04. Инициатор инноваций и предпринимательства</h3>
-          <p>Гринлиф создает благоприятную среду для инноваций и предпринимательства. Компания инициирует высокий уровень предпринимательства и закладывает прочные основы для достижения своих амбициозных целей в сфере производства косметических продуктов.</p>
+        <div class="phil-card reveal">
+          <div class="phil-num">04</div>
+          <h3>Программа</h3>
+          <p>Стать лучшим работодателем на мировом уровне, крупнейшей платформой качественных продуктов по разумной цене и целевым участником благотворительности в Китае.</p>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="text-block">
-        <h2>Центр производства</h2>
-        <p>Производственный центр научно-технической группы Гринлиф представляет собой современный комплекс, специализирующийся в разработке и производстве высококачественных косметических и бытовых товаров. Он отличается высокими стандартами и современным оборудованием.</p>
-        <p>Производственный центр оборудован передовыми технологиями и импортным оборудованием, такими как немецкая вакуумная гомогенная эмульгирующая машина EKATO и французская автоматическая герметизирующая машина KALIX. Все лаборатории соответствуют мировым стандартам.</p>
-        
-        <div class="partners-info">
-          <p><strong>INTERCOS (Италия)</strong> — всемирно известный косметический гигант, основанный Дарио Феррари в 1972 году. Более 40 лет компания остается уникальной в области разработки, исследований и инноваций в производстве косметических средств и средств макияжа.</p>
-          <p><strong>CRB (Швейцария)</strong> — крупнейшее в мире научно-исследовательское предприятие в области ухода за кожей, основанное в 1983 году в Швейцарии. Они занимаются научными исследованиями, имеют запатентованные технологии и поставляют качественную продукцию для ухода за кожей известным международным брендам.</p>
-        </div>
+  <section class="about-section">
+    <div class="container">
+      <div class="section-head">
+        <h2 data-kicker="Особенности">Ключевые особенности</h2>
+        <p class="section-lead">Производство, масштаб и поддержка, которые стоят за продукцией.</p>
       </div>
 
-      <div class="text-block cta-box">
+      <div class="features">
+        <div class="feature-item reveal">
+          <div class="feature-num">01</div>
+          <div class="feature-body">
+            <h3>Современный косметический парк с высокими стандартами качества</h3>
+            <p>Научно-техническая группа Greenleaf создала современный промышленный косметический парк, вложив огромные инвестиции. Центр отличается высокими стандартами качества и сертифицирован по международным стандартам. Здесь используется передовое оборудование и технологии, что гарантирует высокое качество продукции.</p>
+          </div>
+        </div>
+
+        <div class="feature-item reveal">
+          <div class="feature-num">02</div>
+          <div class="feature-body">
+            <h3>Мировая производственная мощность и разнообразие брендов</h3>
+            <p>Промышленный косметический парк Greenleaf обладает мировой производственной мощностью, способной удовлетворить потребности в косметических продуктах. Здесь представлено множество брендов — SEALUXE, iLife, Kardli, Carich, Nilrich, Chanery, Green-Pai и Easy-Love, — которые завоевали популярность у потребителей.</p>
+          </div>
+        </div>
+
+        <div class="feature-item reveal">
+          <div class="feature-num">03</div>
+          <div class="feature-body">
+            <h3>Поддержка правительства и стратегический рост</h3>
+            <p>Greenleaf получила лицензию на прямой маркетинг от Министерства торговли Китая, что подчёркивает её статус и поддержку со стороны правительства. С учётом этой поддержки компания стремится к стратегическому росту и амбициозной цели — достичь ежегодных продаж на уровне 10 миллиардов долларов в ближайшие 3 года.</p>
+          </div>
+        </div>
+
+        <div class="feature-item reveal">
+          <div class="feature-num">04</div>
+          <div class="feature-body">
+            <h3>Инициатор инноваций и предпринимательства</h3>
+            <p>Greenleaf создаёт благоприятную среду для инноваций и предпринимательства. Компания инициирует высокий уровень предпринимательства и закладывает прочные основы для достижения своих амбициозных целей в сфере производства косметических продуктов.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-section is-tinted">
+    <div class="container">
+      <div class="section-head">
+        <h2 data-kicker="Производство">Центр производства</h2>
+        <p class="section-lead">Современный комплекс в Сучжоу: собственные лаборатории и импортное оборудование.</p>
+      </div>
+      <div class="two-col">
+        <p>Производственный центр научно-технической группы Greenleaf представляет собой современный комплекс, специализирующийся на разработке и производстве высококачественных косметических и бытовых товаров. Он отличается высокими стандартами и современным оборудованием.</p>
+        <p>Центр оборудован передовыми технологиями и импортным оборудованием, в том числе немецкой вакуумной гомогенной эмульгирующей машиной EKATO и французской автоматической герметизирующей машиной KALIX. Все лаборатории соответствуют мировым стандартам.</p>
+      </div>
+
+      <div class="partners-grid">
+        <div class="partner-card reveal">
+          <span class="partner-tag">Италия</span>
+          <h3>INTERCOS</h3>
+          <p>Всемирно известный косметический гигант, основанный Дарио Феррари в 1972 году. Более 40 лет компания остаётся уникальной в области разработки, исследований и инноваций в производстве косметических средств и средств макияжа.</p>
+        </div>
+        <div class="partner-card reveal">
+          <span class="partner-tag">Швейцария</span>
+          <h3>CRB</h3>
+          <p>Крупнейшее в мире научно-исследовательское предприятие в области ухода за кожей, основанное в 1983 году в Швейцарии. Запатентованные технологии и поставки качественной продукции для ухода за кожей известным международным брендам.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about-cta">
+    <div class="container">
+      <div class="cta-box reveal">
+        <span class="eyebrow">Сотрудничество</span>
         <h2>Бизнес с Greenleaf</h2>
         <p>Компания хочет видеть вас в качестве своего партнёра!</p>
         <a href="/contacts" class="btn">Связаться со мной</a>
       </div>
-
     </div>
   </section>
 </Base>
 
-<style>
-  .about-hero { padding: 80px 0 60px; text-align: center; }
-  .narrow { max-width: 850px; margin: 0 auto; padding: 0 20px; }
-  .lead { font-size: 1.15rem; color: var(--text-muted); margin-top: 15px; line-height: 1.6; }
+<script is:inline>
+(() => {
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const targets = [...document.querySelectorAll('.reveal')];
+  document.querySelectorAll('h2[data-kicker]').forEach((h) => {
+    h.classList.add('reveal');
+    targets.push(h);
+  });
 
-  .about-content { padding: 60px 0; }
-  
+  if (reduce) {
+    targets.forEach((el) => el.classList.add('is-visible'));
+    return;
+  }
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('is-visible');
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  targets.forEach((el) => io.observe(el));
+})();
+</script>
+
+<style>
+  .about-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 90px;
+    background: linear-gradient(180deg, #f8fbf9 0%, var(--bg-body) 100%);
+  }
+  .hero-glow { position: absolute; inset: 0; pointer-events: none; }
+  .hero-glow::before,
+  .hero-glow::after { content: ''; position: absolute; border-radius: 50%; }
+  .hero-glow::before {
+    width: 760px; height: 760px; right: -200px; top: -300px;
+    background: radial-gradient(circle, rgba(23,155,73,.13), rgba(23,155,73,0) 62%);
+  }
+  .hero-glow::after {
+    width: 520px; height: 520px; left: -200px; bottom: -300px;
+    background: radial-gradient(circle, rgba(0,104,46,.08), rgba(0,104,46,0) 66%);
+  }
+
+  .about-hero .container { position: relative; z-index: 1; }
+
+  .eyebrow {
+    display: inline-block;
+    color: var(--brand-green);
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .about-hero h1 {
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 22px;
+    max-width: 900px;
+  }
+
+  .hero-lead {
+    font-size: 1.06rem;
+    line-height: 1.65;
+    color: var(--text-muted);
+    max-width: 720px;
+    margin: 0;
+  }
+
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 60px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 56px;
   }
 
   .stat-item {
     background: var(--bg-card);
-    padding: 25px;
     border: 1px solid var(--border-color);
-    border-top: 4px solid var(--brand-green);
-    text-align: center;
+    border-top: 3px solid var(--brand-green);
+    padding: 24px 22px 22px;
+    transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, border-color .35s;
+  }
+  .stat-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 104, 46, 0.09);
+  }
+  .stat-value {
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--brand-green-dark);
+  }
+  .stat-label {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-muted);
   }
 
-  .stat-value { font-size: 2rem; font-weight: 800; color: var(--brand-green-dark); margin-bottom: 10px; }
-  .stat-label { font-size: 0.9rem; color: var(--text-muted); line-height: 1.4; }
+  .about-section { padding: 88px 0; }
+  .about-section.is-tinted {
+    background-color: #f4faf6;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5C25 5 20 10 20 15C20 20 25 25 30 25C35 25 40 20 40 15C40 10 35 5 30 5Z' fill='%23179B49' fill-opacity='0.05'/%3E%3Cpath d='M15 35C10 35 5 40 5 45C5 50 10 55 15 55C20 55 25 50 25 45C25 40 20 35 15 35Z' fill='%23179B49' fill-opacity='0.05'/%3E%3Cpath d='M45 35C40 35 35 40 35 45C35 50 40 55 45 55C50 55 55 50 55 45C55 40 50 35 45 35Z' fill='%23179B49' fill-opacity='0.05'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+  }
 
-  .text-block { margin-bottom: 50px; }
-  .text-block h2 { margin-bottom: 20px; color: var(--brand-green-dark); font-size: 1.8rem; }
-  .text-block p { font-size: 1.05rem; line-height: 1.7; color: var(--text); margin-bottom: 15px; }
+  .section-head { margin-bottom: 40px; max-width: 760px; }
 
-  .philosophy-list {
-    list-style: none;
-    padding: 0;
+  h2[data-kicker] {
+    position: relative;
+    font-size: clamp(1.6rem, 2.6vw, 2.2rem);
+    letter-spacing: -0.015em;
+    margin: 0 0 14px;
+  }
+  h2[data-kicker]::before {
+    content: attr(data-kicker);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--brand-green);
+    margin-bottom: 12px;
+  }
+  h2[data-kicker]::after {
+    content: '';
+    display: block;
+    width: 54px;
+    height: 3px;
+    background: var(--brand-green);
+    margin: 18px 0 0;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform .6s ease .1s;
+  }
+  h2[data-kicker].is-visible::after { transform: scaleX(1); }
+
+  .section-lead { color: var(--text-muted); margin: 0; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    max-width: 1000px;
+  }
+  .two-col p {
     margin: 0;
+    color: var(--text-muted);
+    line-height: 1.7;
   }
-  .philosophy-list li {
-    padding: 15px 20px;
-    background: var(--bg-body);
-    margin-bottom: 10px;
-    border-left: 4px solid var(--brand-green);
-    font-size: 1.05rem;
-    line-height: 1.6;
-  }
-  .philosophy-list strong { color: var(--brand-green-dark); }
 
-  .feature-item {
-    margin-bottom: 30px;
+  .philosophy-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
   }
-  .feature-item h3 {
-    font-size: 1.25rem;
-    margin-bottom: 10px;
-    color: var(--text);
-  }
-  .feature-item p { margin-top: 0; }
-
-  .partners-info {
+  .phil-card {
     background: var(--bg-card);
-    padding: 25px;
     border: 1px solid var(--border-color);
-    margin-top: 20px;
+    border-top: 3px solid var(--brand-green);
+    padding: 26px 22px;
+    transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s;
   }
-  .partners-info p { margin-bottom: 15px; }
-  .partners-info p:last-child { margin-bottom: 0; }
+  .phil-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 104, 46, 0.09);
+  }
+  .phil-num {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--brand-green);
+    margin-bottom: 12px;
+  }
+  .phil-card h3 { font-size: 1.05rem; margin: 0 0 10px; }
+  .phil-card p { margin: 0; font-size: 0.88rem; line-height: 1.55; color: var(--text-muted); }
 
-  .cta-box {
-    background: var(--brand-green-light);
-    padding: 40px;
-    text-align: center;
-    border: 1px solid var(--border-color);
-    margin-top: 60px;
+  .features { display: flex; flex-direction: column; }
+  .feature-item {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 26px;
+    padding: 30px 0;
+    border-top: 1px solid var(--border-color);
   }
-  .cta-box h2 { margin-top: 0; }
-  .cta-box p { margin-bottom: 25px; }
+  .feature-item:last-child { border-bottom: 1px solid var(--border-color); }
+  .feature-num {
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: rgba(23, 155, 73, 0.35);
+    line-height: 1;
+  }
+  .feature-body h3 { font-size: 1.12rem; margin: 0 0 10px; }
+  .feature-body p { margin: 0; color: var(--text-muted); line-height: 1.7; max-width: 820px; }
+
+  .partners-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 44px;
+  }
+  .partner-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--brand-green);
+    padding: 28px 26px;
+    transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s;
+  }
+  .partner-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 104, 46, 0.09);
+  }
+  .partner-tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brand-green);
+    margin-bottom: 10px;
+  }
+  .partner-card h3 { font-size: 1.2rem; margin: 0 0 10px; letter-spacing: 0.02em; }
+  .partner-card p { margin: 0; font-size: 0.9rem; line-height: 1.65; color: var(--text-muted); }
+
+  .about-cta { padding: 0 0 96px; }
+  .cta-box {
+    background: linear-gradient(135deg, #eef7f1 0%, #e3f1e8 100%);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--brand-green);
+    padding: 46px 44px;
+  }
+  .cta-box h2 { font-size: clamp(1.5rem, 2.4vw, 2rem); margin: 0 0 12px; }
+  .cta-box p { color: var(--text-muted); margin: 0 0 26px; }
+
+  @media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .philosophy-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .two-col { grid-template-columns: 1fr; gap: 18px; }
+    .partners-grid { grid-template-columns: 1fr; }
+    .about-section { padding: 64px 0; }
+  }
+
+  @media (max-width: 640px) {
+    .about-hero { padding: 64px 0 64px; }
+    .stats-grid { grid-template-columns: 1fr; margin-top: 40px; }
+    .philosophy-grid { grid-template-columns: 1fr; }
+    .feature-item { grid-template-columns: 1fr; gap: 10px; padding: 24px 0; }
+    .feature-num { font-size: 1.1rem; }
+    .cta-box { padding: 30px 22px; }
+    .about-section { padding: 56px 0; }
+    .about-cta { padding-bottom: 64px; }
+  }
 </style>
