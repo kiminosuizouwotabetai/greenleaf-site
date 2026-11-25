@@ -14,3 +14,5 @@ _scrape/
 data/marketplace-cache.json
 data/descriptions-cache.json
 data/categories-cache.json
+# исходники видео
+_video-src/

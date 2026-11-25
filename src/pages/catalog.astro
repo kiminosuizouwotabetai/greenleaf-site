@@ -266,7 +266,7 @@ import Base from '../layouts/Base.astro';
         const [bg, fg] = colorOf(p.sub);
         return `<article class="product-card" data-id="${p.id}">
           <div class="product-image">
-            <img src="${esc(p.img)}" alt="${esc(p.title)}" width="500" height="500" loading="lazy" decoding="async" />
+            <img src="${esc(p.img)}" alt="${esc(p.title)}" width="400" height="400" loading="lazy" decoding="async" />
           </div>
           <div class="product-info">
             <span class="category-tag" style="--tag-bg:${bg};--tag-fg:${fg}">${esc(p.sub)}</span>
@@ -436,9 +436,18 @@ import Base from '../layouts/Base.astro';
       fetch('/catalog/data.json')
         .then((r) => r.json())
         .then((data) => {
-          data.products.forEach((p, i) => {
-            p.order = i;
-            p.search = `${p.title} ${p.article} ${p.brand} ${p.sub} ${p.cat}`.toLowerCase();
+          // сервер отдаёт компактный формат: массив массивов + список ключей
+          const keys = data.keys || ['id', 'article', 'title', 'short', 'cat', 'sub', 'img', 'brand', 'vol'];
+          data.products = data.products.map((row, i) => {
+            const item = {};
+            if (Array.isArray(row)) {
+              keys.forEach((k, idx) => { item[k] = row[idx]; });
+            } else {
+              Object.assign(item, row);
+            }
+            item.order = i;
+            item.search = `${item.title} ${item.article} ${item.brand} ${item.sub} ${item.cat}`.toLowerCase();
+            return item;
           });
           DATA = data;
           renderFilters();
